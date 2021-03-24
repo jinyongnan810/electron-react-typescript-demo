@@ -9,9 +9,10 @@ const createWindow = (): void => {
       nodeIntegration: true,
     },
   });
-  win.loadURL(
-    isDev ? "http://localhost:9000" : `file://${app.getAppPath()}/index.html`
-  );
+  // win.loadURL(
+  //   isDev ? "http://localhost:9000" : `file://${app.getAppPath()}/index.html`
+  // );
+  win.loadURL(`file://${app.getAppPath()}/index.html`);
 };
 
 app.on("ready", createWindow);
