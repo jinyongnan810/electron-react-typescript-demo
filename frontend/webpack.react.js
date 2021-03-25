@@ -4,8 +4,8 @@ const path = require("path");
 module.exports = {
   mode: "development",
   entry: "./src/index.tsx",
-  // target: "electron-renderer",
-  target: "web",
+  target: "electron-renderer",
+  // target: "web",
   devtool: "source-map",
   devServer: {
     contentBase: path.join(__dirname, "dist/index.js"),

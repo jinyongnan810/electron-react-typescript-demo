@@ -4,6 +4,9 @@ import installExtension, {
   REDUX_DEVTOOLS,
 } from "electron-devtools-installer";
 import isDev from "electron-is-dev";
+import { ipcMain } from "electron";
+import axios from "axios";
+axios.defaults.baseURL = "http://localhost:4000";
 const isMac = process.platform === "darwin" ? true : false;
 let mainWindow: BrowserWindow | null;
 const createMainWindow = (): void => {
@@ -12,12 +15,14 @@ const createMainWindow = (): void => {
     height: 600,
     webPreferences: {
       nodeIntegration: true,
+      contextIsolation: false,
+      enableRemoteModule: true,
     },
   });
   mainWindow.loadURL(
     isDev ? "http://localhost:9000" : `file://${app.getAppPath()}/index.html`
   );
-  // win.loadURL(`file://${app.getAppPath()}/index.html`);
+  // mainWindow.loadURL(`file://${app.getAppPath()}/index.html`);
   if (isDev)
     installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS]).catch((err) =>
       console.log("Error loading React DevTools: ", err)
@@ -63,3 +68,13 @@ app.on("activate", () => {
 
 // Stop error
 app.allowRendererProcessReuse = true;
+
+// events
+ipcMain.on("auth:signup", async (data) => {
+  try {
+    await axios.post("/api/users/signup", data);
+  } catch (error) {
+    alert(`Error:${error}`);
+  }
+  ipcMain.emit("auth:signup", null, null);
+});
