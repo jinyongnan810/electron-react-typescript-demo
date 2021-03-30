@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu } from "electron";
+import { app, BrowserWindow, Menu,Notification } from "electron";
 import installExtension, {
   REACT_DEVELOPER_TOOLS,
   REDUX_DEVTOOLS,
@@ -35,7 +35,10 @@ const createMainWindow = (): void => {
   // menu
   const mainMenu = Menu.buildFromTemplate(menu as any);
   Menu.setApplicationMenu(mainMenu);
-
+  new Notification({
+    title:"Welcome",
+    body:"App started."
+  }).show()
   mainWindow.on("closed", () => (mainWindow = null));
 };
 const menu = [
