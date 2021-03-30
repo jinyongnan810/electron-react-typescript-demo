@@ -1,43 +1,48 @@
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const path = require("path");
+const path = require('path')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+
+const rootPath = path.resolve(__dirname, '.')
 
 module.exports = {
-  mode: "development",
-  entry: "./src/index.tsx",
-  target: "electron-renderer",
-  // target: "web",
-  devtool: "source-map",
-  devServer: {
-    contentBase: path.join(__dirname, "dist/index.js"),
-    compress: true,
-    port: 9000,
-  },
   resolve: {
-    alias: {
-      ["@"]: path.resolve(__dirname, "src"),
-    },
-    extensions: [".tsx", ".ts", ".js"],
+    extensions: ['.tsx', '.ts', '.js'],
+    mainFields: ['main', 'module', 'browser']
   },
+  entry: path.resolve(rootPath, 'src', 'index.tsx'),
+  target: 'electron-renderer',
+  devtool: 'source-map',
   module: {
     rules: [
       {
-        test: /\.ts(x?)$/,
-        include: /src/,
-        use: [{ loader: "ts-loader" }],
+        test: /\.(js|ts|tsx)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader'
+        }
       },
       {
         test: /\.s[ac]ss$/i,
         use: ["style-loader", "css-loader", "sass-loader"],
       },
-    ],
+    ]
+  },
+  devServer: {
+    contentBase: path.join(rootPath, 'dist/renderer'),
+    historyApiFallback: true,
+    compress: true,
+    hot: true,
+    host: '0.0.0.0',
+    port: 4000,
+    publicPath: '/'
   },
   output: {
-    path: __dirname + "/dist",
-    filename: "index.js",
+    path: path.resolve(rootPath, 'dist/renderer'),
+    filename: 'js/[name].js',
+    publicPath: './'
   },
   plugins: [
     new HtmlWebpackPlugin({
       template: "./src/index.html",
-    }),
-  ],
-};
+    })
+  ]
+}

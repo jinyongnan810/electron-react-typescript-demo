@@ -22,8 +22,8 @@ const start = async () => {
     console.log(error.messsage);
   }
 
-  app.listen(4000, async () => {
-    console.log("Backend listening on port 4000.");
+  app.listen(5000, async () => {
+    console.log("Backend listening on port 5000.");
   });
 };
 

@@ -2,25 +2,38 @@
   "name": "frontend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./dist/main.js",
   "scripts": {
-    "build": "webpack",
-    "react:dev": "webpack serve --mode=development",
-    "electron:dev": "nodemon",
-    "dev": "concurrently --kill-others \"npm run react:dev\" \"npm run electron:dev\"",
-    "start": "npm run build && electron dist/main.js"
+    "dev": "npm-run-all -p dev:react electron:serve",
+    "dev:electron": "cross-env NODE_ENV=development webpack --config webpack.electron.js --mode development && npm run start:electron",
+    "dev:react": "cross-env NODE_ENV=development webpack serve --config webpack.react.js --mode development",
+    "electron:serve": "wait-on http-get://localhost:4000/ && npm run dev:electron",
+    "start:electron": "electron .",
+    "build": "npm-run-all build:electron build:react",
+    "build:run": "npm-run-all build start:electron",
+    "build:electron": "webpack --config webpack.electron.js",
+    "build:react": "webpack --config webpack.react.js",
+    "package": "npm-run-all build package:dist",
+    "package:dist": "electron-builder --dir"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@babel/core": "^7.13.14",
+    "@babel/plugin-transform-runtime": "^7.13.10",
+    "@babel/preset-env": "^7.13.12",
+    "@babel/preset-react": "^7.13.13",
+    "@babel/preset-typescript": "^7.13.0",
     "@types/axios": "^0.14.0",
     "@types/electron-devtools-installer": "^2.2.0",
     "@types/react": "^17.0.3",
     "@types/react-dom": "^17.0.2",
     "@types/react-router-dom": "^5.1.7",
     "axios": "^0.21.1",
+    "babel-loader": "^8.2.2",
     "concurrently": "^6.0.0",
+    "cross-env": "^7.0.3",
     "css-loader": "^5.1.3",
     "electron": "^12.0.1",
     "electron-devtools-installer": "^3.1.1",
@@ -40,6 +53,8 @@
     "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
-    "bootstrap": "^5.0.0-beta3"
+    "bootstrap": "^5.0.0-beta3",
+    "npm-run-all": "^4.1.5",
+    "wait-on": "^5.3.0"
   }
 }

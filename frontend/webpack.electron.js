@@ -1,27 +1,30 @@
-const path = require("path");
+const path = require('path')
+
+const rootPath = path.resolve(__dirname, '.')
 
 module.exports = {
-  // Build Mode
-  mode: "development",
-  entry: "./src/main.ts",
-  target: "electron-main",
   resolve: {
-    alias: {
-      ["@"]: path.resolve(__dirname, "src"),
-    },
-    extensions: [".tsx", ".ts", ".js"],
+    extensions: ['.tsx', '.ts', '.js']
   },
+  devtool: 'source-map',
+  entry: path.resolve(rootPath, 'electron', 'main.ts'),
+  target: 'electron-main',
   module: {
     rules: [
       {
-        test: /\.ts$/,
-        include: /src/,
-        use: [{ loader: "ts-loader" }],
-      },
-    ],
+        test: /\.(js|ts|tsx)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader'
+        }
+      }
+    ]
+  },
+  node: {
+    __dirname: false
   },
   output: {
-    path: __dirname + "/dist",
-    filename: "main.js",
-  },
-};
+    path: path.resolve(rootPath, 'dist'),
+    filename: '[name].js'
+  }
+}

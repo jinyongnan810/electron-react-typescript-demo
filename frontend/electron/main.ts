@@ -6,7 +6,9 @@ import installExtension, {
 import isDev from "electron-is-dev";
 import { ipcMain } from "electron";
 import axios from "axios";
-axios.defaults.baseURL = "http://localhost:4000";
+import * as url from "url"
+import path from "path"
+axios.defaults.baseURL = "http://localhost:5000";
 const isMac = process.platform === "darwin" ? true : false;
 let mainWindow: BrowserWindow | null;
 const createMainWindow = (): void => {
@@ -20,9 +22,12 @@ const createMainWindow = (): void => {
     },
   });
   mainWindow.loadURL(
-    isDev ? "http://localhost:9000" : `file://${app.getAppPath()}/index.html`
+    isDev ? "http://localhost:4000" : url.format({
+      pathname: path.join(__dirname, 'renderer/index.html'),
+      protocol: 'file:',
+      slashes: true
+    })
   );
-  // mainWindow.loadURL(`file://${app.getAppPath()}/index.html`);
   if (isDev)
     installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS]).catch((err) =>
       console.log("Error loading React DevTools: ", err)
