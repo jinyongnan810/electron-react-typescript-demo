@@ -8,7 +8,7 @@ import { ipcMain } from "electron";
 import axios from "axios";
 import * as url from "url";
 import path from "path";
-axios.defaults.baseURL = "http://localhost:5000";
+
 const isMac = process.platform === "darwin" ? true : false;
 let mainWindow: BrowserWindow | null;
 const createMainWindow = (): void => {
@@ -84,27 +84,4 @@ app.on("activate", () => {
 // Stop error
 app.allowRendererProcessReuse = true;
 
-const jsonConfig = {
-  headers: {
-    "Content-Type": "application/json",
-  },
-};
 // events
-ipcMain.on("auth:signup", async (event, arg) => {
-  try {
-    const res = await axios.post("/api/users/signup", arg, jsonConfig);
-    event.reply("auth:signup", { error: null, data: res.data });
-  } catch (error) {
-    console.log(`Error:${JSON.stringify(error)}`);
-    event.reply("auth:signup", { error: error, data: null });
-  }
-});
-ipcMain.on("auth:login", async (event, arg) => {
-  try {
-    const res = await axios.post("/api/users/signin", arg, jsonConfig);
-    event.reply("auth:login", { error: null, data: res.data });
-  } catch (error) {
-    console.log(`Error:${JSON.stringify(error)}`);
-    event.reply("auth:login", { error: error, data: null });
-  }
-});

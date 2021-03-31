@@ -1,11 +1,28 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { useHistory } from "react-router";
 
-const Login = ({login}:{login:Function}) => {
+const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const history = useHistory();
   const onSubmit = async (e: any) => {
     e.preventDefault();
-    login({ email, password });
+    const jsonConfig = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+    try {
+      const res = await axios.post(
+        "/api/users/signin",
+        { email, password },
+        jsonConfig
+      );
+      history.push("/dashboard");
+    } catch (error) {
+      console.log(`Error:${JSON.stringify(error)}`);
+    }
   };
 
   return (
@@ -40,10 +57,7 @@ const Login = ({login}:{login:Function}) => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <button
-            className="btn btn-large btn-success"
-            type="submit"
-          >
+          <button className="btn btn-large btn-success" type="submit">
             Login
           </button>
         </form>

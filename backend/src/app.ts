@@ -1,7 +1,8 @@
 import express from "express";
 require("express-async-errors");
 import { json } from "body-parser";
-import morgan from "morgan"
+import morgan from "morgan";
+import cors from "cors";
 
 import cookieSesion from "cookie-session";
 
@@ -13,6 +14,7 @@ import { NotFoundError } from "./errors/not-found-error";
 import { handleError } from "./middlewares/error-handler";
 
 const app = express();
+app.use(cors());
 app.set("trust proxy", true); //trust ingress nginx
 app.use(json());
 app.use(
@@ -21,7 +23,9 @@ app.use(
     secure: process.env.NODE_ENV === "production", // only https
   })
 );
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms'))
+app.use(
+  morgan(":method :url :status :res[content-length] - :response-time ms")
+);
 
 app.use(CurrentUserRouter);
 app.use(SignInRouter);

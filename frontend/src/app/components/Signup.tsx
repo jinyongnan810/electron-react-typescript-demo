@@ -1,10 +1,27 @@
 import React, { useState } from "react";
-const Signup = ({ signup }: { signup: Function }) => {
+import axios from "axios";
+import { useHistory } from "react-router";
+const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const history = useHistory();
   const onSubmit = async (e: any) => {
     e.preventDefault();
-    signup({ email, password });
+    const jsonConfig = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+    try {
+      const res = await axios.post(
+        "/api/users/signup",
+        { email, password },
+        jsonConfig
+      );
+      history.push("/dashboard");
+    } catch (error) {
+      console.log(`Error:${JSON.stringify(error)}`);
+    }
   };
 
   return (
@@ -39,10 +56,7 @@ const Signup = ({ signup }: { signup: Function }) => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <button
-            className="btn btn-large btn-success"
-            type="submit"
-          >
+          <button className="btn btn-large btn-success" type="submit">
             Signup
           </button>
         </form>
