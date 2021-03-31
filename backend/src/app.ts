@@ -14,7 +14,12 @@ import { NotFoundError } from "./errors/not-found-error";
 import { handleError } from "./middlewares/error-handler";
 
 const app = express();
-app.use(cors());
+var corsOptions = {
+  origin: "http://localhost:4000",
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
+app.use(cors(corsOptions));
 app.set("trust proxy", true); //trust ingress nginx
 app.use(json());
 app.use(

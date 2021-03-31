@@ -12,6 +12,7 @@ import "../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js";
 
 const app = () => {
   axios.defaults.baseURL = "http://localhost:5000";
+  axios.defaults.withCredentials = true;
   const history = createHashHistory();
   return (
     <Router history={history}>
