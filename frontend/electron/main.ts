@@ -30,10 +30,15 @@ const createMainWindow = (): void => {
           slashes: true,
         })
   );
-  if (isDev)
-    installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS]).catch((err) =>
-      console.log("Error loading React DevTools: ", err)
-    ); //install devtools
+  if (isDev) {
+    //install devtools
+    installExtension(REACT_DEVELOPER_TOOLS)
+      .then((name) => console.log(`Added Extension:  ${name}`))
+      .catch((err) => console.log("An error occurred: ", err));
+    installExtension(REDUX_DEVTOOLS)
+      .then((name) => console.log(`Added Extension:  ${name}`))
+      .catch((err) => console.log("An error occurred: ", err));
+  }
   // menu
   const mainMenu = Menu.buildFromTemplate(menu as any);
   Menu.setApplicationMenu(mainMenu);
