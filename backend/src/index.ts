@@ -19,7 +19,7 @@ const start = async () => {
     );
     console.log("DB connected.");
   } catch (error) {
-    console.log(error.messsage);
+    console.log(error);
   }
 
   app.listen(5000, async () => {

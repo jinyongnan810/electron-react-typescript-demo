@@ -6,7 +6,7 @@ import Dashboard from "./components/Dashboard";
 import Header from "./components/Header";
 import Signup from "./components/Signup";
 import "./sass/index.scss";
-// import "../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js";
+import "../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js";
 const app = () => {
   const history = useHistory();
   const signup = (data: { email: String; password: String }) => {
