@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu,Notification } from "electron";
+import { app, BrowserWindow, Menu, Notification } from "electron";
 import installExtension, {
   REACT_DEVELOPER_TOOLS,
   REDUX_DEVTOOLS,
@@ -36,8 +36,8 @@ const createMainWindow = (): void => {
   const mainMenu = Menu.buildFromTemplate(menu as any);
   Menu.setApplicationMenu(mainMenu);
   new Notification({
-    title:"Welcome",
-    body:"App started."
+    title: "Welcome",
+    body: "App started."
   }).show()
   mainWindow.on("closed", () => (mainWindow = null));
 };
@@ -48,16 +48,16 @@ const menu = [
   },
   ...(isDev
     ? [
-        {
-          label: "Developer",
-          submenu: [
-            { role: "reload" },
-            { role: "forcereload" },
-            { type: "separator" },
-            { role: "toggledevtools" },
-          ],
-        },
-      ]
+      {
+        label: "Developer",
+        submenu: [
+          { role: "reload" },
+          { role: "forcereload" },
+          { type: "separator" },
+          { role: "toggledevtools" },
+        ],
+      },
+    ]
     : []),
 ];
 
@@ -77,12 +77,22 @@ app.on("activate", () => {
 // Stop error
 app.allowRendererProcessReuse = true;
 
-// events
-ipcMain.on("auth:signup", async (data) => {
-  try {
-    await axios.post("/api/users/signup", data);
-  } catch (error) {
-    alert(`Error:${error}`);
+
+const jsonConfig = {
+  headers: {
+    'Content-Type': 'application/json'
   }
-  ipcMain.emit("auth:signup", null, null);
+}
+// events
+ipcMain.on("auth:signup", async (event,arg) => {
+  try {
+    const res = await axios.post("/api/users/signup", arg, jsonConfig);
+    // ipcMain.emit("auth:signup", null, res.data);
+    event.reply("auth:signup",{error:null,data:res.data})
+  } catch (error) {
+    console.log(`Error:${JSON.stringify(error)}`);
+    // ipcMain.emit("auth:signup", error, null);
+    event.reply("auth:signup",{error:error,data:null})
+  }
+
 });

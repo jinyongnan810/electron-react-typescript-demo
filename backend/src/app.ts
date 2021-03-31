@@ -1,6 +1,7 @@
 import express from "express";
 require("express-async-errors");
 import { json } from "body-parser";
+import morgan from "morgan"
 
 import cookieSesion from "cookie-session";
 
@@ -20,6 +21,7 @@ app.use(
     secure: process.env.NODE_ENV === "production", // only https
   })
 );
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms'))
 
 app.use(CurrentUserRouter);
 app.use(SignInRouter);

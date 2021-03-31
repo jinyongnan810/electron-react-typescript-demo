@@ -1,6 +1,7 @@
 import React from "react";
 import { Route, Router, Switch, useHistory } from "react-router";
 import { BrowserRouter, HashRouter } from "react-router-dom";
+import {createHashHistory} from "history"
 import { ipcRenderer } from "electron";
 import Dashboard from "./components/Dashboard";
 import Header from "./components/Header";
@@ -8,19 +9,20 @@ import Signup from "./components/Signup";
 import "./sass/index.scss";
 import "../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js";
 const app = () => {
-  const history = useHistory();
   const signup = (data: { email: String; password: String }) => {
-    ipcRenderer.sendSync("auth:signup", data);
+    ipcRenderer.send("auth:signup", data);
   };
-  ipcRenderer.on("auth:signup", (error) => {
-    if (!error) {
-      history.push("/dashboard");
+  ipcRenderer.on("auth:signup", (event,arg) => {
+    if (!arg.error) {
+      history.push("/dashboard")
     } else {
-      alert(`Error Sign up:${error}`);
+      console.log(`Error Sign up:${JSON.stringify(arg.error)}`)
     }
   });
+
+  const history = createHashHistory()
   return (
-    <HashRouter>
+    <Router history={history}>
       <Header />
       <div className="container-fluid">
         <Switch>
@@ -30,7 +32,7 @@ const app = () => {
           <Route path="/dashboard" component={Dashboard} />
         </Switch>
       </div>
-    </HashRouter>
+    </Router>
   );
 };
 
