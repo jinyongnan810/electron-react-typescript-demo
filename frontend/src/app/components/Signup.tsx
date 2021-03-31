@@ -1,13 +1,9 @@
 import React, { useState } from "react";
-import axios from "axios";
-import { useHistory } from "react-router";
 const Signup = ({ signup }: { signup: Function }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const history = useHistory();
   const onSubmit = async (e: any) => {
     e.preventDefault();
-    console.log("onsubmit");
     signup({ email, password });
   };
 
@@ -46,10 +42,6 @@ const Signup = ({ signup }: { signup: Function }) => {
           <button
             className="btn btn-large btn-success"
             type="submit"
-            onClick={(e) => {
-              // console.log("onclick");
-              signup({ email, password });
-            }}
           >
             Signup
           </button>

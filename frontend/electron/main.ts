@@ -6,8 +6,8 @@ import installExtension, {
 import isDev from "electron-is-dev";
 import { ipcMain } from "electron";
 import axios from "axios";
-import * as url from "url"
-import path from "path"
+import * as url from "url";
+import path from "path";
 axios.defaults.baseURL = "http://localhost:5000";
 const isMac = process.platform === "darwin" ? true : false;
 let mainWindow: BrowserWindow | null;
@@ -22,11 +22,13 @@ const createMainWindow = (): void => {
     },
   });
   mainWindow.loadURL(
-    isDev ? "http://localhost:4000" : url.format({
-      pathname: path.join(__dirname, 'renderer/index.html'),
-      protocol: 'file:',
-      slashes: true
-    })
+    isDev
+      ? "http://localhost:4000"
+      : url.format({
+          pathname: path.join(__dirname, "renderer/index.html"),
+          protocol: "file:",
+          slashes: true,
+        })
   );
   if (isDev)
     installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS]).catch((err) =>
@@ -37,8 +39,8 @@ const createMainWindow = (): void => {
   Menu.setApplicationMenu(mainMenu);
   new Notification({
     title: "Welcome",
-    body: "App started."
-  }).show()
+    body: "App started.",
+  }).show();
   mainWindow.on("closed", () => (mainWindow = null));
 };
 const menu = [
@@ -48,16 +50,16 @@ const menu = [
   },
   ...(isDev
     ? [
-      {
-        label: "Developer",
-        submenu: [
-          { role: "reload" },
-          { role: "forcereload" },
-          { type: "separator" },
-          { role: "toggledevtools" },
-        ],
-      },
-    ]
+        {
+          label: "Developer",
+          submenu: [
+            { role: "reload" },
+            { role: "forcereload" },
+            { type: "separator" },
+            { role: "toggledevtools" },
+          ],
+        },
+      ]
     : []),
 ];
 
@@ -77,22 +79,27 @@ app.on("activate", () => {
 // Stop error
 app.allowRendererProcessReuse = true;
 
-
 const jsonConfig = {
   headers: {
-    'Content-Type': 'application/json'
-  }
-}
+    "Content-Type": "application/json",
+  },
+};
 // events
-ipcMain.on("auth:signup", async (event,arg) => {
+ipcMain.on("auth:signup", async (event, arg) => {
   try {
     const res = await axios.post("/api/users/signup", arg, jsonConfig);
-    // ipcMain.emit("auth:signup", null, res.data);
-    event.reply("auth:signup",{error:null,data:res.data})
+    event.reply("auth:signup", { error: null, data: res.data });
   } catch (error) {
     console.log(`Error:${JSON.stringify(error)}`);
-    // ipcMain.emit("auth:signup", error, null);
-    event.reply("auth:signup",{error:error,data:null})
+    event.reply("auth:signup", { error: error, data: null });
   }
-
+});
+ipcMain.on("auth:login", async (event, arg) => {
+  try {
+    const res = await axios.post("/api/users/signin", arg, jsonConfig);
+    event.reply("auth:login", { error: null, data: res.data });
+  } catch (error) {
+    console.log(`Error:${JSON.stringify(error)}`);
+    event.reply("auth:login", { error: error, data: null });
+  }
 });
