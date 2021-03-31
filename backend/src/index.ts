@@ -1,4 +1,9 @@
 import mongoose from "mongoose";
+import { MongoMemoryServer } from 'mongodb-memory-server';
+
+const mongod = new MongoMemoryServer();
+
+
 import dotenv from "dotenv";
 dotenv.config();
 import { app } from "./app";
@@ -9,8 +14,10 @@ const start = async () => {
     throw new Error("JWT_KEY not set.");
   }
   try {
+    const uri = await mongod.getUri();
     await mongoose.connect(
-      `mongodb+srv://jinyongnan:${process.env.MONGO_PWD}@cluster0.xk5om.gcp.mongodb.net/electron-full-demo?retryWrites=true&w=majority`,
+      // `mongodb+srv://jinyongnan:${process.env.MONGO_PWD}@cluster0.xk5om.gcp.mongodb.net/electron-full-demo?retryWrites=true&w=majority`,
+      uri,
       {
         useNewUrlParser: true,
         useUnifiedTopology: true,
