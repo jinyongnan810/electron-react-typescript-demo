@@ -1,4 +1,4 @@
-import { useAppDispatch, useAppSelector } from "../../hooks";
+import { useAppDispatch, useAppSelector } from "../hooks";
 import React from "react";
 import { Link } from "react-router-dom";
 import { logout } from "../actions/auth";

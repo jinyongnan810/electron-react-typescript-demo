@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Route, Router, Switch, useHistory } from "react-router";
 import { Provider } from "react-redux";
-import store from "../store";
+import store from "./store";
 import { createHashHistory } from "history";
 
 import { ipcRenderer } from "electron";

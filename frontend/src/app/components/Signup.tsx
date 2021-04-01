@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Redirect, useHistory } from "react-router";
-import { useAppDispatch, useAppSelector } from "../../hooks";
+import { useAppDispatch, useAppSelector } from "../hooks";
 import { signup } from "../actions/auth";
 const Signup = () => {
   const [email, setEmail] = useState("");

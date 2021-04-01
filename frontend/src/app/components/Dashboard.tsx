@@ -1,4 +1,4 @@
-import { useAppSelector } from "../../hooks";
+import { useAppSelector } from "../hooks";
 import React from "react";
 import { Redirect, useHistory } from "react-router";
 
