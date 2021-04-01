@@ -1,28 +1,20 @@
 import React, { useState } from "react";
-import axios from "axios";
-import { useHistory } from "react-router";
+import { Redirect, useHistory } from "react-router";
+import { useAppDispatch, useAppSelector } from "../../hooks";
+import { signup } from "../actions/auth";
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const history = useHistory();
+  const dispatch = useAppDispatch();
   const onSubmit = async (e: any) => {
     e.preventDefault();
-    const jsonConfig = {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
-    try {
-      const res = await axios.post(
-        "/api/users/signup",
-        { email, password },
-        jsonConfig
-      );
-      history.push("/dashboard");
-    } catch (error) {
-      console.log(`Error:${JSON.stringify(error)}`);
-    }
+    dispatch(signup(email, password));
   };
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  if (isAuthenticated) {
+    return <Redirect to="/" />;
+  }
 
   return (
     <div className="card col-6 p-3 position-absolute top-50 start-50 translate-middle">

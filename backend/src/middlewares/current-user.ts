@@ -27,7 +27,7 @@ export const currentUser = (
         jwt_token,
         process.env.JWT_KEY!
       ) as UserPayload;
-      req.currentUser = payload;
+      req.currentUser = { email: payload.email, id: payload.id };
     } catch (error) {}
   }
   next();
