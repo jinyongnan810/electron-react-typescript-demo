@@ -56,6 +56,13 @@ const authReducer: Reducer<AuthBaseState, AuthBaseAction> = (
         isAuthenticated: false,
         loading: false,
       };
+    case types.AUTH_ERROR_CLEAR:
+      return {
+        ...state,
+        user: null,
+        isAuthenticated: false,
+        loading: false,
+      };
     default:
       return state;
   }
