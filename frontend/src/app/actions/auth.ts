@@ -24,12 +24,12 @@ export const loadUser = (): ThunkAction<
       });
     } else {
       dispatch({
-        type: types.AUTH_ERROR,
+        type: types.AUTH_EXPIRED,
       });
     }
   } catch (error) {
     dispatch({
-      type: types.AUTH_ERROR,
+      type: types.AUTH_EXPIRED,
     });
   }
 };
@@ -51,6 +51,7 @@ export const login = (
   } catch (error) {
     dispatch({
       type: types.AUTH_ERROR,
+      payload: { errors: error.response.data.errors },
     });
   }
 };
@@ -72,6 +73,7 @@ export const signup = (
   } catch (error) {
     dispatch({
       type: types.AUTH_ERROR,
+      payload: { errors: error.response.data.errors },
     });
   }
 };
@@ -89,7 +91,7 @@ export const logout = (): ThunkAction<
     });
   } catch (error) {
     dispatch({
-      type: types.AUTH_ERROR,
+      type: types.AUTH_EXPIRED,
     });
   }
 };

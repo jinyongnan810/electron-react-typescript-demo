@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Redirect, useHistory } from "react-router";
-import { useAppDispatch, useAppSelector } from "../hooks";
-import { login } from "../actions/auth";
+import { useAppDispatch, useAppSelector } from "../../hooks";
+import { login } from "../../actions/auth";
+import Errors from "./Errors";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -49,6 +50,7 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
+          <Errors />
           <button className="btn btn-large btn-success" type="submit">
             Login
           </button>
