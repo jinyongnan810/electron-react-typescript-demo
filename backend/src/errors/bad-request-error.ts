@@ -2,7 +2,7 @@ import { CustomError } from "./custom-error";
 
 export class BadRequestError extends CustomError {
   statusCode: number = 400;
-  constructor(public msg: string) {
+  constructor(public msg: string = "") {
     super(msg || "Bad request error occurred.");
     Object.setPrototypeOf(this, BadRequestError.prototype);
   }
