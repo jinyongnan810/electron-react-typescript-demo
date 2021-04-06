@@ -59,7 +59,7 @@ const authReducer: Reducer<AuthBaseState, AuthBaseAction> = (
     case types.AUTH_ERROR_CLEAR:
       return {
         ...state,
-        user: null,
+        user: { ...state.user, errors: [] },
         isAuthenticated: false,
         loading: false,
       };

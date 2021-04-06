@@ -1,15 +1,20 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks";
 import * as types from "../../actions/types";
 
 const Errors = () => {
+  useEffect(() => {
+    return function cleanError() {
+      dispatch({ type: types.AUTH_ERROR_CLEAR });
+    };
+  }, []);
   const errors = useAppSelector((state) => state.auth.user?.errors);
   const dispatch = useAppDispatch();
   const clearErrors = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     dispatch({ type: types.AUTH_ERROR_CLEAR });
   };
-  if (!errors) {
+  if (!errors || errors.length === 0) {
     return <div></div>;
   }
   return (
