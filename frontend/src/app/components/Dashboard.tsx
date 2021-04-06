@@ -1,6 +1,7 @@
 import { useAppSelector } from "../hooks";
 import React from "react";
 import { Redirect, useHistory } from "react-router";
+import Messages from "./Messages";
 
 const Dashboard = () => {
   const history = useHistory();
@@ -8,7 +9,12 @@ const Dashboard = () => {
   if (!isAuthenticated) {
     return <Redirect to="/login" />;
   }
-  return <div>Dashboard</div>;
+  return (
+    <div>
+      <Messages />
+      Dashboard
+    </div>
+  );
 };
 
 export default Dashboard;

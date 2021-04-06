@@ -3,10 +3,6 @@ import * as types from "../actions/types";
 interface UserInfo {
   email?: String;
   id?: String;
-  errors?: {
-    message: String;
-    field?: String;
-  }[];
 }
 interface AuthBaseState {
   isAuthenticated: Boolean | null;
@@ -41,25 +37,11 @@ const authReducer: Reducer<AuthBaseState, AuthBaseAction> = (
         isAuthenticated: true,
         loading: false,
       };
-    case types.AUTH_ERROR:
-      return {
-        ...state,
-        user: { errors: payload.errors },
-        isAuthenticated: false,
-        loading: false,
-      };
     case types.AUTH_EXPIRED:
     case types.LOGOUT:
       return {
         ...state,
         user: null,
-        isAuthenticated: false,
-        loading: false,
-      };
-    case types.AUTH_ERROR_CLEAR:
-      return {
-        ...state,
-        user: { ...state.user, errors: [] },
         isAuthenticated: false,
         loading: false,
       };

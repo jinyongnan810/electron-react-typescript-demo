@@ -1,1 +1,15 @@
 @import "../../../node_modules/bootstrap/scss/bootstrap";
+.alert-success {
+  ul {
+    list-style: none;
+    margin: 0;
+  }
+  li::before {
+    content: "✓  ";
+  }
+}
+button:focus,
+button:active {
+  outline: none !important;
+  box-shadow: none !important;
+}

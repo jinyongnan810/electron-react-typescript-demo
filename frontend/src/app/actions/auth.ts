@@ -1,6 +1,7 @@
 import axios from "axios";
 import { Action, AnyAction, Dispatch } from "redux";
 import { ThunkAction } from "redux-thunk";
+import { clearMessages, showMessages } from "./messages";
 import * as types from "./types";
 
 const jsonConfig = {
@@ -49,10 +50,7 @@ export const login = (
       payload: res.data,
     });
   } catch (error) {
-    dispatch({
-      type: types.AUTH_ERROR,
-      payload: { errors: error.response.data.errors },
-    });
+    dispatch(showMessages("warning", error.response.data.errors));
   }
 };
 
@@ -70,11 +68,11 @@ export const signup = (
       type: types.SIGNUP_SUCCESS,
       payload: res.data,
     });
+    dispatch(
+      showMessages("info", [{ message: `Dear ${email},Welcome!` }], true)
+    );
   } catch (error) {
-    dispatch({
-      type: types.AUTH_ERROR,
-      payload: { errors: error.response.data.errors },
-    });
+    dispatch(showMessages("warning", error.response.data.errors));
   }
 };
 
@@ -94,4 +92,5 @@ export const logout = (): ThunkAction<
       type: types.AUTH_EXPIRED,
     });
   }
+  // dispatch(clearMessages());
 };
