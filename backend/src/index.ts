@@ -1,8 +1,9 @@
+import { createServer } from "http";
+import { Server, Socket } from "socket.io";
 import mongoose from "mongoose";
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { MongoMemoryServer } from "mongodb-memory-server";
 
 const mongod = new MongoMemoryServer();
-
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -28,8 +29,12 @@ const start = async () => {
   } catch (error) {
     console.log(error);
   }
-
-  app.listen(5000, async () => {
+  const http = createServer(app);
+  const io = new Server(http, {});
+  io.on("connection", (socket: any) => {
+    console.log("connected");
+  });
+  http.listen(5000, async () => {
     console.log("Backend listening on port 5000.");
   });
 };
