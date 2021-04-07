@@ -1,5 +1,5 @@
 import { createServer } from "http";
-import { Server, Socket } from "socket.io";
+import WebSocket from "ws";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 
@@ -30,7 +30,7 @@ const start = async () => {
     console.log(error);
   }
   const http = createServer(app);
-  const io = new Server(http, {});
+  const io = new WebSocket.Server({ server: http });
   io.on("connection", (socket: any) => {
     console.log("connected");
   });
