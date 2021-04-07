@@ -30,9 +30,12 @@ const start = async () => {
     console.log(error);
   }
   const http = createServer(app);
-  const io = new WebSocket.Server({ server: http });
-  io.on("connection", (socket: any) => {
-    console.log("connected");
+  const ws = new WebSocket.Server({ server: http });
+  ws.on("connection", (conn) => {
+    conn.send("Hello from Server");
+    conn.on("message", (msg) => {
+      console.log(msg);
+    });
   });
   http.listen(5000, async () => {
     console.log("Backend listening on port 5000.");
