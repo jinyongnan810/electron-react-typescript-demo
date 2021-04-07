@@ -5,10 +5,6 @@ import Messages from "./Messages";
 
 const Dashboard = () => {
   const history = useHistory();
-  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
-  if (!isAuthenticated) {
-    return <Redirect to="/login" />;
-  }
   return (
     <div>
       <Messages />

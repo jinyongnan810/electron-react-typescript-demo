@@ -13,6 +13,8 @@ import Login from "./components/auth/Login";
 import "./sass/index.scss";
 import "../../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js";
 import { loadUser } from "./actions/auth";
+import { PrivateRoute } from "./routes/PrivateRoute";
+import { PublicRoute } from "./routes/PublicRoute";
 
 const app = () => {
   axios.defaults.baseURL = "http://localhost:5000";
@@ -27,13 +29,9 @@ const app = () => {
         <Header />
         <div className="container-fluid">
           <Switch>
-            <Route path="/signup">
-              <Signup />
-            </Route>
-            <Route path="/login">
-              <Login />
-            </Route>
-            <Route path="/" component={Dashboard} />
+            <PublicRoute path="/signup" component={Signup} />
+            <PublicRoute path="/login" component={Login} />
+            <PrivateRoute path="/" component={Dashboard} />
           </Switch>
         </div>
       </Router>

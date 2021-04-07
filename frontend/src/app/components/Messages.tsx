@@ -6,7 +6,6 @@ const Messages = () => {
   useEffect(() => {
     return function cleanError() {
       if (!maintain) {
-        console.log("hello");
         dispatch({ type: types.CLEAR_MESSAGES });
       }
     };

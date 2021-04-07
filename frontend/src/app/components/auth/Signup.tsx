@@ -12,10 +12,6 @@ const Signup = () => {
     e.preventDefault();
     dispatch(signup(email, password));
   };
-  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
-  if (isAuthenticated) {
-    return <Redirect to="/" />;
-  }
 
   return (
     <div className="card col-6 p-3 position-absolute top-50 start-50 translate-middle">
