@@ -17,6 +17,7 @@ const Dashboard = () => {
       };
       ws.onclose = (e) => {
         console.log("Websocket closed.");
+        alert("Websocket closed.");
       };
     }
 

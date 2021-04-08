@@ -72,7 +72,7 @@ const start = async () => {
           return ws.terminate();
         }
         (ws as any).isAlive = false;
-        console.log("ping");
+        ws.ping("");
       }
     );
   }, 2000);
