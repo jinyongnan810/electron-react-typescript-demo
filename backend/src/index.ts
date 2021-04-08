@@ -3,13 +3,35 @@ import WebSocket from "ws";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import cookieSesion from "cookie-session";
+import * as types from "./websocket/types";
 const mongod = new MongoMemoryServer();
 
 import dotenv from "dotenv";
 dotenv.config();
 import { app } from "./app";
 import { extractUser } from "./middlewares/current-user";
-const clients: Map<String, WebSocket> = new Map();
+interface UserInfo {
+  ws: WebSocket;
+  email: String;
+}
+interface MsgType {
+  type: String;
+  data: Object;
+}
+const clients: Map<String, UserInfo> = new Map();
+const sendToClient = (ws: WebSocket, msg: MsgType) => {
+  ws.send(JSON.stringify(msg));
+};
+const broadcaseClientsStatus = () => {
+  // send user lists
+  const userList: { id: String; email: String }[] = [];
+  clients.forEach((c, key) => {
+    userList.push({ id: key, email: c.email });
+  });
+  clients.forEach((c) => {
+    sendToClient(c.ws, { type: types.CURRENT_USERS, data: userList });
+  });
+};
 const start = async () => {
   console.log("Backend starting...");
   if (!process.env.JWT_KEY) {
@@ -33,11 +55,17 @@ const start = async () => {
   const server = createServer(app);
   const wss = new WebSocket.Server({ noServer: true });
   wss.on("connection", (ws, request: any) => {
+    // accept the client
     (ws as any).isAlive = true;
-    clients.set(request.currentUser.id, ws);
+    clients.set(request.currentUser.id, {
+      ws,
+      email: request.currentUser.email,
+    });
     console.log(`${request.currentUser.id} connected`);
-
     ws.send("Hello from Server");
+    // broadcast current users status
+    broadcaseClientsStatus();
+
     ws.on("message", (msg) => {
       console.log(msg);
     });
@@ -67,12 +95,12 @@ const start = async () => {
   });
   setInterval(() => {
     clients.forEach(
-      (ws: WebSocket, key: String, map: Map<String, WebSocket>) => {
-        if (!(ws as any).isAlive) {
-          return ws.terminate();
+      (user: UserInfo, key: String, map: Map<String, UserInfo>) => {
+        if (!(user.ws as any).isAlive) {
+          return user.ws.terminate();
         }
-        (ws as any).isAlive = false;
-        ws.ping("");
+        (user.ws as any).isAlive = false;
+        user.ws.ping("");
       }
     );
   }, 2000);
