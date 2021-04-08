@@ -1,8 +1,8 @@
 import { AnyAction, Reducer } from "redux";
 import * as types from "../actions/types";
 interface UserInfo {
-  email?: String;
-  id?: String;
+  email?: string;
+  id?: string;
 }
 interface AuthBaseState {
   isAuthenticated: Boolean | null;
@@ -10,7 +10,7 @@ interface AuthBaseState {
   user: UserInfo | null;
 }
 interface AuthBaseAction {
-  type: String;
+  type: string;
   payload: UserInfo;
 }
 const initialState: AuthBaseState = {

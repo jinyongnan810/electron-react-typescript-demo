@@ -12,19 +12,19 @@ import { app } from "./app";
 import { extractUser } from "./middlewares/current-user";
 interface UserInfo {
   ws: WebSocket;
-  email: String;
+  email: string;
 }
 interface MsgType {
-  type: String;
+  type: string;
   data: Object;
 }
-const clients: Map<String, UserInfo> = new Map();
+const clients: Map<string, UserInfo> = new Map();
 const sendToClient = (ws: WebSocket, msg: MsgType) => {
   ws.send(JSON.stringify(msg));
 };
 const broadcaseClientsStatus = () => {
   // send user lists
-  const userList: { id: String; email: String }[] = [];
+  const userList: { id: string; email: string }[] = [];
   clients.forEach((c, key) => {
     userList.push({ id: key, email: c.email });
   });
@@ -62,7 +62,6 @@ const start = async () => {
       email: request.currentUser.email,
     });
     console.log(`${request.currentUser.id} connected`);
-    ws.send("Hello from Server");
     // broadcast current users status
     broadcaseClientsStatus();
 
@@ -75,6 +74,7 @@ const start = async () => {
     ws.on("close", () => {
       console.log(`${request.currentUser.id} closed`);
       clients.delete(request.currentUser.id);
+      broadcaseClientsStatus();
     });
   });
   server.on("upgrade", (request, socket, head) => {
@@ -95,7 +95,7 @@ const start = async () => {
   });
   setInterval(() => {
     clients.forEach(
-      (user: UserInfo, key: String, map: Map<String, UserInfo>) => {
+      (user: UserInfo, key: string, map: Map<string, UserInfo>) => {
         if (!(user.ws as any).isAlive) {
           return user.ws.terminate();
         }

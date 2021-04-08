@@ -3,13 +3,13 @@ import * as types from "../actions/types";
 interface MessagesInfo {
   level: "info" | "warning" | "error";
   messages: {
-    message: String;
-    field?: String;
+    message: string;
+    field?: string;
   }[];
   maintain: Boolean;
 }
 interface MessagesBaseAction {
-  type: String;
+  type: string;
   payload?: MessagesInfo;
 }
 const initialState: MessagesInfo = {

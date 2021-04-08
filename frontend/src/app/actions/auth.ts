@@ -36,8 +36,8 @@ export const loadUser = (): ThunkAction<
 };
 
 export const login = (
-  email: String,
-  password: String
+  email: string,
+  password: string
 ): ThunkAction<void, Object, unknown, AnyAction> => async (dispatch) => {
   try {
     const res = await axios.post(
@@ -55,8 +55,8 @@ export const login = (
 };
 
 export const signup = (
-  email: String,
-  password: String
+  email: string,
+  password: string
 ): ThunkAction<void, Object, unknown, AnyAction> => async (dispatch) => {
   try {
     const res = await axios.post(
