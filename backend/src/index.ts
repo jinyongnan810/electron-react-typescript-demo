@@ -33,12 +33,16 @@ const start = async () => {
   const server = createServer(app);
   const wss = new WebSocket.Server({ noServer: true });
   wss.on("connection", (ws, request: any) => {
+    (ws as any).isAlive = true;
     clients.set(request.currentUser.id, ws);
     console.log(`${request.currentUser.id} connected`);
 
     ws.send("Hello from Server");
     ws.on("message", (msg) => {
       console.log(msg);
+    });
+    ws.on("pong", () => {
+      (ws as any).isAlive = true;
     });
     ws.on("close", () => {
       console.log(`${request.currentUser.id} closed`);
@@ -61,6 +65,17 @@ const start = async () => {
       });
     });
   });
+  setInterval(() => {
+    clients.forEach(
+      (ws: WebSocket, key: String, map: Map<String, WebSocket>) => {
+        if (!(ws as any).isAlive) {
+          return ws.terminate();
+        }
+        (ws as any).isAlive = false;
+        console.log("ping");
+      }
+    );
+  }, 2000);
   server.listen(5000, async () => {
     console.log("Backend listening on port 5000.");
   });
