@@ -21,13 +21,13 @@ var corsOptions = {
 };
 app.use(cors(corsOptions));
 app.set("trust proxy", true); //trust ingress nginx
-app.use(json());
 app.use(
   cookieSesion({
     signed: false, // no encryption
     secure: process.env.NODE_ENV === "production", // only https
   })
 );
+app.use(json());
 app.use(
   morgan(":method :url :status :res[content-length] - :response-time ms")
 );

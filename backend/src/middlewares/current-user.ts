@@ -20,6 +20,11 @@ export const currentUser = (
   res: Response,
   next: NextFunction
 ) => {
+  extractUser(req);
+  next();
+};
+
+export const extractUser = (req: Request) => {
   const jwt_token = req.session!.jwt;
   if (jwt_token) {
     try {
@@ -30,5 +35,4 @@ export const currentUser = (
       req.currentUser = { email: payload.email, id: payload.id };
     } catch (error) {}
   }
-  next();
 };

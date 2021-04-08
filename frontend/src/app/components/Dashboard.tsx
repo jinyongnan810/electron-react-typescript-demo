@@ -4,16 +4,29 @@ import { Redirect, useHistory } from "react-router";
 import Messages from "./Messages";
 
 const Dashboard = () => {
-  const history = useHistory();
+  let ws: WebSocket | null;
+  const { isAuthenticated, loading } = useAppSelector((state) => state.auth);
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:5000/");
-    ws.onopen = (e) => {
-      ws.send("Hello from client!");
+    if (isAuthenticated) {
+      ws = new WebSocket("ws://localhost:5000/");
+      ws.onopen = (e) => {
+        ws!.send("Hello from client!");
+      };
+      ws.onmessage = (e) => {
+        console.log(e);
+      };
+      ws.onclose = (e) => {
+        console.log("Websocket closed.");
+      };
+    }
+
+    return function cleanUp() {
+      if (ws) {
+        ws!.close();
+        ws = null;
+      }
     };
-    ws.onmessage = (e) => {
-      console.log(e.data);
-    };
-  }, []);
+  }, [loading]);
   return (
     <div>
       <Messages />
