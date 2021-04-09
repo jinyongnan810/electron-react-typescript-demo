@@ -8,8 +8,12 @@ import * as types from "../actions/types";
 
 const Dashboard = () => {
   let ws: WebSocket | null;
-  const { isAuthenticated, loading } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, loading, user } = useAppSelector(
+    (state) => state.auth
+  );
   const dispatch = useAppDispatch();
+  const joinRoom = () => {};
+  const exitRoom = () => {};
   useEffect(() => {
     if (isAuthenticated) {
       ws = new WebSocket("ws://localhost:5000/");
@@ -42,7 +46,7 @@ const Dashboard = () => {
   return (
     <div>
       <Messages />
-      <UserList />
+      <UserList me={user?.id} />
     </div>
   );
 };

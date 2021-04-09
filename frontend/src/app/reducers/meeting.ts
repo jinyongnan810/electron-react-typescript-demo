@@ -1,7 +1,14 @@
 import { AnyAction, Reducer } from "redux";
 import * as types from "../actions/types";
+interface UserInfoType {
+  id: string;
+  email: string;
+  status: "idle" | "host" | "guest";
+  with: { id: string; email: string; status: UserInfoType["status"] }[];
+}
+
 interface MeetingInfo {
-  users: { id: string; email: string }[];
+  users: UserInfoType[];
 }
 interface MeetingBaseAction {
   type: string;
@@ -25,4 +32,4 @@ const meetingReducer: Reducer<MeetingInfo, MeetingBaseAction> = (
   }
 };
 export default meetingReducer;
-export { MeetingInfo };
+export { MeetingInfo, UserInfoType };

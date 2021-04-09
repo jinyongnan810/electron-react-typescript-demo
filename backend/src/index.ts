@@ -11,10 +11,11 @@ dotenv.config();
 import { app } from "./app";
 import { extractUser } from "./middlewares/current-user";
 interface UserInfo {
+  id: string;
   ws: WebSocket;
   email: string;
   status: "idle" | "host" | "guest";
-  with: string[];
+  with: UserInfo[];
 }
 interface MsgType {
   type: string;
@@ -30,9 +31,19 @@ const sendErrors = (ws: WebSocket, errors: string[]) => {
 };
 const broadcaseClientsStatus = () => {
   // send user lists
-  const userList: { id: string; email: string }[] = [];
+  const userList: {
+    id: string;
+    email: string;
+    status: UserInfo["status"];
+    with: { id: string; email: string; status: UserInfo["status"] }[];
+  }[] = [];
   clients.forEach((c, key) => {
-    userList.push({ id: key, email: c.email });
+    userList.push({
+      id: key,
+      email: c.email,
+      status: c.status,
+      with: c.with.map((w) => ({ id: w.id, email: w.email, status: w.status })),
+    });
   });
   clients.forEach((c) => {
     sendToClient(c.ws, { type: types.CURRENT_USERS, data: userList });
@@ -65,6 +76,7 @@ const start = async () => {
     (ws as any).isAlive = true;
     const id = request.currentUser.id;
     clients.set(id, {
+      id,
       ws,
       email: request.currentUser.email,
       status: "idle",
@@ -80,6 +92,9 @@ const start = async () => {
       switch (type) {
         case types.JOIN_ROOM:
           const { to } = data;
+          if (to === id) {
+            return;
+          }
           const target = clients.get(to);
           if (target) {
             // if target joined other rooms
@@ -108,26 +123,28 @@ const start = async () => {
           const me = clients.get(id);
           if (me!.status === "host") {
             const guests = me!.with;
-            const newHostId = guests[0];
-            const newHost = clients.get(newHostId);
+            const newHostInfo = guests[0];
+            const newHost = clients.get(newHostInfo.id);
             // update new host
             newHost!.status = "host";
-            const newGuests = guests.filter((g) => g !== id && g !== newHostId);
+            const newGuests = guests.filter(
+              (g) => g.id !== id && g.id !== newHostInfo.id
+            );
             newHost!.with = newGuests;
             // update other guests
             newGuests.forEach((ng) => {
-              const g = clients.get(ng);
-              g!.with = [newHostId];
+              const g = clients.get(ng.id);
+              g!.with = [newHostInfo];
             });
             // update me
             me!.status = "idle";
             me!.with = [];
             broadcaseClientsStatus();
           } else if (me!.status === "guest") {
-            const host = clients.get(me!.with[0]);
+            const host = clients.get(me!.with[0].id);
             me!.status = "idle";
             me!.with = [];
-            host!.with = host!.with.filter((w) => w !== id);
+            host!.with = host!.with.filter((w) => w.id !== id);
             if (host!.with.length === 0) {
               host!.status = "idle";
             }
