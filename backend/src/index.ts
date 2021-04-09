@@ -13,6 +13,8 @@ import { extractUser } from "./middlewares/current-user";
 interface UserInfo {
   ws: WebSocket;
   email: string;
+  status: "idle" | "host" | "guest";
+  with: string[];
 }
 interface MsgType {
   type: string;
@@ -21,6 +23,10 @@ interface MsgType {
 const clients: Map<string, UserInfo> = new Map();
 const sendToClient = (ws: WebSocket, msg: MsgType) => {
   ws.send(JSON.stringify(msg));
+};
+const sendErrors = (ws: WebSocket, errors: string[]) => {
+  const data = { type: types.ERROR, data: errors };
+  sendToClient(ws, data);
 };
 const broadcaseClientsStatus = () => {
   // send user lists
@@ -57,16 +63,82 @@ const start = async () => {
   wss.on("connection", (ws, request: any) => {
     // accept the client
     (ws as any).isAlive = true;
-    clients.set(request.currentUser.id, {
+    const id = request.currentUser.id;
+    clients.set(id, {
       ws,
       email: request.currentUser.email,
+      status: "idle",
+      with: [],
     });
-    console.log(`${request.currentUser.id} connected`);
+    console.log(`${id} connected`);
     // broadcast current users status
     broadcaseClientsStatus();
 
     ws.on("message", (msg) => {
       console.log(msg);
+      const { type, data } = JSON.parse(msg.toString());
+      switch (type) {
+        case types.JOIN_ROOM:
+          const { to } = data;
+          const target = clients.get(to);
+          if (target) {
+            // if target joined other rooms
+            if (target!.status === "guest") {
+              sendErrors(ws, ["The user is currently not available!"]);
+              return;
+            }
+            const me = clients.get(id);
+            if (me!.status !== "idle") {
+              sendErrors(ws, ["You are in a meeting now!"]);
+              return;
+            }
+            // change status
+            me!.status = "guest";
+            target!.status = "host";
+            // update relationships
+            me!.with = [to];
+            target!.with.push(id);
+            // update user list
+            broadcaseClientsStatus();
+          } else {
+            sendErrors(ws, ["The user is not online!"]);
+          }
+          break;
+        case types.EXIT_ROOM:
+          const me = clients.get(id);
+          if (me!.status === "host") {
+            const guests = me!.with;
+            const newHostId = guests[0];
+            const newHost = clients.get(newHostId);
+            // update new host
+            newHost!.status = "host";
+            const newGuests = guests.filter((g) => g !== id && g !== newHostId);
+            newHost!.with = newGuests;
+            // update other guests
+            newGuests.forEach((ng) => {
+              const g = clients.get(ng);
+              g!.with = [newHostId];
+            });
+            // update me
+            me!.status = "idle";
+            me!.with = [];
+            broadcaseClientsStatus();
+          } else if (me!.status === "guest") {
+            const host = clients.get(me!.with[0]);
+            me!.status = "idle";
+            me!.with = [];
+            host!.with = host!.with.filter((w) => w !== id);
+            if (host!.with.length === 0) {
+              host!.status = "idle";
+            }
+            broadcaseClientsStatus();
+          } else {
+            return;
+          }
+          break;
+        default:
+          console.log(`Unknown type:${type}`);
+      }
     });
     ws.on("pong", () => {
       (ws as any).isAlive = true;
