@@ -29,6 +29,46 @@ const sendErrors = (ws: WebSocket, errors: string[]) => {
   const data = { type: types.ERROR, data: errors };
   sendToClient(ws, data);
 };
+const leaveRoom = (id: string) => {
+  const me = clients.get(id);
+  if (me!.status === "host") {
+    const guests = me!.with;
+    const newHostInfo = guests[0];
+    const newHost = clients.get(newHostInfo.id);
+    if (guests.length === 1) {
+      newHost!.status = "idle";
+      newHost!.with = [];
+    } else {
+      // update new host
+      newHost!.status = "host";
+      const newGuests = guests.filter(
+        (g) => g.id !== id && g.id !== newHostInfo.id
+      );
+      newHost!.with = newGuests;
+      // update other guests
+      newGuests.forEach((ng) => {
+        const g = clients.get(ng.id);
+        g!.with = [newHostInfo];
+      });
+    }
+
+    // update me
+    me!.status = "idle";
+    me!.with = [];
+    broadcaseClientsStatus();
+  } else if (me!.status === "guest") {
+    const host = clients.get(me!.with[0].id);
+    me!.status = "idle";
+    me!.with = [];
+    host!.with = host!.with.filter((w) => w.id !== id);
+    if (host!.with.length === 0) {
+      host!.status = "idle";
+    }
+    broadcaseClientsStatus();
+  } else {
+    return;
+  }
+};
 const broadcaseClientsStatus = () => {
   // send user lists
   const userList: {
@@ -111,8 +151,8 @@ const start = async () => {
             me!.status = "guest";
             target!.status = "host";
             // update relationships
-            me!.with = [to];
-            target!.with.push(id);
+            me!.with = [target];
+            target!.with.push(me!);
             // update user list
             broadcaseClientsStatus();
           } else {
@@ -120,38 +160,7 @@ const start = async () => {
           }
           break;
         case types.EXIT_ROOM:
-          const me = clients.get(id);
-          if (me!.status === "host") {
-            const guests = me!.with;
-            const newHostInfo = guests[0];
-            const newHost = clients.get(newHostInfo.id);
-            // update new host
-            newHost!.status = "host";
-            const newGuests = guests.filter(
-              (g) => g.id !== id && g.id !== newHostInfo.id
-            );
-            newHost!.with = newGuests;
-            // update other guests
-            newGuests.forEach((ng) => {
-              const g = clients.get(ng.id);
-              g!.with = [newHostInfo];
-            });
-            // update me
-            me!.status = "idle";
-            me!.with = [];
-            broadcaseClientsStatus();
-          } else if (me!.status === "guest") {
-            const host = clients.get(me!.with[0].id);
-            me!.status = "idle";
-            me!.with = [];
-            host!.with = host!.with.filter((w) => w.id !== id);
-            if (host!.with.length === 0) {
-              host!.status = "idle";
-            }
-            broadcaseClientsStatus();
-          } else {
-            return;
-          }
+          leaveRoom(id);
           break;
         default:
           console.log(`Unknown type:${type}`);
@@ -162,6 +171,7 @@ const start = async () => {
     });
     ws.on("close", () => {
       console.log(`${request.currentUser.id} closed`);
+      leaveRoom(request.currentUser.id);
       clients.delete(request.currentUser.id);
       broadcaseClientsStatus();
     });

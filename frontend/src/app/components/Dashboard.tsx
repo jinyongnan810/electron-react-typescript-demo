@@ -12,8 +12,18 @@ const Dashboard = () => {
     (state) => state.auth
   );
   const dispatch = useAppDispatch();
-  const joinRoom = () => {};
-  const exitRoom = () => {};
+  const sendMsg = (type: string, data: Object) => {
+    if (ws) {
+      const msg = { type, data };
+      ws.send(JSON.stringify(msg));
+    }
+  };
+  const joinRoom = (to: string) => {
+    sendMsg(wstypes.JOIN_ROOM, { to });
+  };
+  const exitRoom = () => {
+    sendMsg(wstypes.EXIT_ROOM, {});
+  };
   useEffect(() => {
     if (isAuthenticated) {
       ws = new WebSocket("ws://localhost:5000/");
@@ -46,7 +56,7 @@ const Dashboard = () => {
   return (
     <div>
       <Messages />
-      <UserList me={user?.id} />
+      <UserList me={user?.id} joinRoom={joinRoom} exitRoom={exitRoom} />
     </div>
   );
 };
