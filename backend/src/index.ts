@@ -31,14 +31,17 @@ const sendErrors = (ws: WebSocket, errors: string[]) => {
 };
 const leaveRoom = (id: string) => {
   const me = clients.get(id);
+  // i am a host
   if (me!.status === "host") {
     const guests = me!.with;
     const newHostInfo = guests[0];
     const newHost = clients.get(newHostInfo.id);
+    // only you and me
     if (guests.length === 1) {
       newHost!.status = "idle";
       newHost!.with = [];
     } else {
+      // more than 2 people
       // update new host
       newHost!.status = "host";
       const newGuests = guests.filter(
@@ -57,10 +60,12 @@ const leaveRoom = (id: string) => {
     me!.with = [];
     broadcaseClientsStatus();
   } else if (me!.status === "guest") {
+    // i am a guest
     const host = clients.get(me!.with[0].id);
     me!.status = "idle";
     me!.with = [];
     host!.with = host!.with.filter((w) => w.id !== id);
+    // only you and me
     if (host!.with.length === 0) {
       host!.status = "idle";
     }

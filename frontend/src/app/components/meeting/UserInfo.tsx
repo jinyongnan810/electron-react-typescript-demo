@@ -12,6 +12,7 @@ const UserInfo = ({
   joinRoom: Function;
   exitRoom: Function;
 }) => {
+  // show guest list
   const guests =
     user.with.length > 0 ? (
       <ul>
@@ -26,6 +27,9 @@ const UserInfo = ({
     ) : (
       ""
     );
+  // join button
+  // 1. not me
+  // 2. i am idle
   const joinBtn = meInfo.id !== user.id && meInfo.status === "idle" && (
     <button
       className="btn btn-outline-primary"
@@ -36,6 +40,10 @@ const UserInfo = ({
       Join
     </button>
   );
+  // exit button
+  // 1. i am not idle
+  // 2-1. i am a host, and this is my info
+  // 2-2. i am a guest, and this is the room i joined
   const exitBtn = meInfo.status !== "idle" &&
     ((meInfo.status === "host" && meInfo.id === user.id) ||
       meInfo.with[0].id === user.id) && (
