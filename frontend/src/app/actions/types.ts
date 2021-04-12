@@ -11,3 +11,5 @@ export const SHOW_MESSAGES = "SHOW_MESSAGES";
 export const CLEAR_MESSAGES = "CLEAR_MESSAGES";
 // meeting
 export const UPDATE_USERS = "UPDATE_USERS";
+export const ADD_AUDIO = "ADD_AUDIO";
+export const REMOVE_AUDIO = "REMOVE_AUDIO";

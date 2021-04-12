@@ -94,6 +94,13 @@ const broadcaseClientsStatus = () => {
     sendToClient(c.ws, { type: types.CURRENT_USERS, data: userList });
   });
 };
+const broadcastIJoinedRoom = (me: UserInfo, host: UserInfo) => {
+  const msg = { type: types.I_JOINED_ROOM, data: { id: me.id } };
+  sendToClient(host.ws, msg);
+  host.with
+    .filter((w) => w.id !== me.id)
+    .forEach((u) => sendToClient(u.ws, msg));
+};
 const start = async () => {
   console.log("Backend starting...");
   if (!process.env.JWT_KEY) {
@@ -136,14 +143,13 @@ const start = async () => {
       const { type, data } = JSON.parse(msg.toString());
       switch (type) {
         case types.JOIN_ROOM:
-          const { to } = data;
-          if (to === id) {
+          if (data.to === id) {
             return;
           }
-          const target = clients.get(to);
-          if (target) {
+          let joined = clients.get(data.to);
+          if (joined) {
             // if target joined other rooms
-            if (target!.status === "guest") {
+            if (joined!.status === "guest") {
               sendErrors(ws, ["The user is currently not available!"]);
               return;
             }
@@ -154,19 +160,61 @@ const start = async () => {
             }
             // change status
             me!.status = "guest";
-            target!.status = "host";
+            joined!.status = "host";
             // update relationships
-            me!.with = [target];
-            target!.with.push(me!);
+            me!.with = [joined];
+            joined!.with.push(me!);
             // update user list
             broadcaseClientsStatus();
+            // announce the user joined the room
+            broadcastIJoinedRoom(me!, joined);
           } else {
             sendErrors(ws, ["The user is not online!"]);
           }
           break;
+
         case types.EXIT_ROOM:
           leaveRoom(id);
           break;
+        case types.TRANSFER_OFFER:
+          if (data.to === id) {
+            return;
+          }
+          let offerred = clients.get(data.to);
+          if (offerred) {
+            sendToClient(offerred.ws, {
+              type: types.TRANSFER_OFFER,
+              data: { id: id, offer: data.offer },
+            });
+          }
+          break;
+
+        case types.TRANSFER_ANSWER:
+          if (data.to === id) {
+            return;
+          }
+          let answered = clients.get(data.to);
+          if (answered) {
+            sendToClient(answered.ws, {
+              type: types.TRANSFER_ANSWER,
+              data: { id: id, answer: data.answer },
+            });
+          }
+          break;
+
+        case types.TRANSFER_CANDIDATE:
+          if (data.to === id) {
+            return;
+          }
+          let candidateTo = clients.get(data.to);
+          if (candidateTo) {
+            sendToClient(candidateTo.ws, {
+              type: types.TRANSFER_CANDIDATE,
+              data: { id: id, candidate: data.candidate },
+            });
+          }
+          break;
+
         default:
           console.log(`Unknown type:${type}`);
       }

@@ -1,6 +1,7 @@
 import { useAppSelector } from "../../hooks";
 import React from "react";
 import UserInfo from "./UserInfo";
+import { RTCPeerInfo } from "../Dashboard";
 
 const UserList = ({
   me,

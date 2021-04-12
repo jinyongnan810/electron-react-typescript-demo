@@ -1,5 +1,7 @@
 import { UserInfoType } from "../../../app/reducers/meeting";
 import React from "react";
+import { RTCPeerInfo } from "../Dashboard";
+import AudioPlayer from "./AudioPlayer";
 
 const UserInfo = ({
   user,
