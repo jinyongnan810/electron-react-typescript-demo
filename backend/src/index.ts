@@ -58,7 +58,8 @@ const leaveRoom = (id: string) => {
     // update me
     me!.status = "idle";
     me!.with = [];
-    broadcaseClientsStatus();
+    broadcastClientsStatus();
+    broadcastIExitedRoom(me!, newHost!);
   } else if (me!.status === "guest") {
     // i am a guest
     const host = clients.get(me!.with[0].id);
@@ -69,12 +70,13 @@ const leaveRoom = (id: string) => {
     if (host!.with.length === 0) {
       host!.status = "idle";
     }
-    broadcaseClientsStatus();
+    broadcastClientsStatus();
+    broadcastIExitedRoom(me!, host!);
   } else {
     return;
   }
 };
-const broadcaseClientsStatus = () => {
+const broadcastClientsStatus = () => {
   // send user lists
   const userList: {
     id: string;
@@ -96,6 +98,13 @@ const broadcaseClientsStatus = () => {
 };
 const broadcastIJoinedRoom = (me: UserInfo, host: UserInfo) => {
   const msg = { type: types.I_JOINED_ROOM, data: { id: me.id } };
+  sendToClient(host.ws, msg);
+  host.with
+    .filter((w) => w.id !== me.id)
+    .forEach((u) => sendToClient(u.ws, msg));
+};
+const broadcastIExitedRoom = (me: UserInfo, host: UserInfo) => {
+  const msg = { type: types.I_EXITED_ROOM, data: { id: me.id } };
   sendToClient(host.ws, msg);
   host.with
     .filter((w) => w.id !== me.id)
@@ -136,7 +145,7 @@ const start = async () => {
     });
     console.log(`${id} connected`);
     // broadcast current users status
-    broadcaseClientsStatus();
+    broadcastClientsStatus();
 
     ws.on("message", (msg) => {
       console.log(msg);
@@ -165,7 +174,7 @@ const start = async () => {
             me!.with = [joined];
             joined!.with.push(me!);
             // update user list
-            broadcaseClientsStatus();
+            broadcastClientsStatus();
             // announce the user joined the room
             broadcastIJoinedRoom(me!, joined);
           } else {
@@ -226,7 +235,7 @@ const start = async () => {
       console.log(`${request.currentUser.id} closed`);
       leaveRoom(request.currentUser.id);
       clients.delete(request.currentUser.id);
-      broadcaseClientsStatus();
+      broadcastClientsStatus();
     });
   });
   server.on("upgrade", (request, socket, head) => {

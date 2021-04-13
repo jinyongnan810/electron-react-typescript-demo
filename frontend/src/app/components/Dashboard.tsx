@@ -105,6 +105,9 @@ const Dashboard = () => {
     sendMsg(wstypes.JOIN_ROOM, { to });
   };
   const exitRoom = () => {
+    rtcConnections.forEach((conn) => conn.rtcConn.close());
+    rtcConnections = new Map();
+    dispatch({ type: types.CLEAR_AUDIO });
     sendMsg(wstypes.EXIT_ROOM, {});
   };
   useEffect(() => {
@@ -136,6 +139,13 @@ const Dashboard = () => {
             };
             // create offer
             createOffer(joined, joinedNewConn);
+            break;
+          case wstypes.I_EXITED_ROOM:
+            let leftRoomUser = rtcConnections.get(data.data.id);
+            if (leftRoomUser) {
+              leftRoomUser.rtcConn.close();
+            }
+            dispatch({ type: types.REMOVE_AUDIO, payload: data.data.id });
             break;
 
           case wstypes.TRANSFER_OFFER:
@@ -188,6 +198,7 @@ const Dashboard = () => {
         ws = null;
         rtcConnections.forEach((conn) => conn.rtcConn.close());
         rtcConnections = new Map();
+        dispatch({ type: types.CLEAR_AUDIO });
       }
     };
   }, [loading]);

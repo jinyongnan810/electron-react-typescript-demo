@@ -21,7 +21,7 @@ interface MeetingInfo {
 }
 interface MeetingBaseAction {
   type: string;
-  payload: MeetingInfo["users"] | ConnectedAudioType | string;
+  payload?: MeetingInfo["users"] | ConnectedAudioType | string;
 }
 const initialState: MeetingInfo = {
   users: [],
@@ -48,6 +48,11 @@ const meetingReducer: Reducer<MeetingInfo, MeetingBaseAction> = (
       return {
         ...state,
         audios: newAudios,
+      };
+    case types.CLEAR_AUDIO:
+      return {
+        ...state,
+        audios: [],
       };
     default:
       return state;
