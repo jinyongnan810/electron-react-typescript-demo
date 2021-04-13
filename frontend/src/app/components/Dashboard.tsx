@@ -128,7 +128,7 @@ const Dashboard = () => {
   };
   useEffect(() => {
     if (isAuthenticated) {
-      ws = new WebSocket("ws://localhost:5000/");
+      ws = new WebSocket(process.env.WEBSOCKET_URL!);
       ws.onopen = (e) => {
         console.log("Connected to server.");
       };

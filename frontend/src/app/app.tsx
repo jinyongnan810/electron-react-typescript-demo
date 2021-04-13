@@ -17,7 +17,7 @@ import { PrivateRoute } from "./routes/PrivateRoute";
 import { PublicRoute } from "./routes/PublicRoute";
 
 const app = () => {
-  axios.defaults.baseURL = "http://localhost:5000";
+  axios.defaults.baseURL = process.env.SERVER_URL;
   axios.defaults.withCredentials = true;
   const history = createHashHistory();
   useEffect(() => {
