@@ -102,6 +102,7 @@ const stopLocalStream = async () => {
       localStream.getTracks().forEach(function (track) {
         track.stop();
       });
+      localStream = null;
     }
   } catch (error) {
     alert(`Cannot stop localstream:${JSON.stringify(error)}`);
