@@ -34,7 +34,10 @@ const sendMsg = (type: string, data: Object) => {
   }
 };
 // WebRT
-const newConnection = (id: string) => {
+const newConnection = async (id: string) => {
+  if (!localStream) {
+    await getLocalStream();
+  }
   const rtcConn = new RTCPeerConnection(rtcConfig);
   rtcConnections.set(id, { id, rtcConn });
   // add tracks
@@ -93,12 +96,23 @@ const getLocalStream = async () => {
     alert(`Cannot get localstream:${JSON.stringify(error)}`);
   }
 };
+const stopLocalStream = async () => {
+  try {
+    if (localStream) {
+      localStream.getTracks().forEach(function (track) {
+        track.stop();
+      });
+    }
+  } catch (error) {
+    alert(`Cannot stop localstream:${JSON.stringify(error)}`);
+  }
+};
 
 const Dashboard = () => {
   const { isAuthenticated, loading, user } = useAppSelector(
     (state) => state.auth
   );
-  const userList = useAppSelector((state) => state.meeting.users);
+  const userlist = useAppSelector((state) => state.meeting.users);
   const dispatch = useAppDispatch();
 
   const joinRoom = (to: string) => {
@@ -112,12 +126,11 @@ const Dashboard = () => {
   };
   useEffect(() => {
     if (isAuthenticated) {
-      getLocalStream();
       ws = new WebSocket("ws://localhost:5000/");
       ws.onopen = (e) => {
         console.log("Connected to server.");
       };
-      ws.onmessage = (e) => {
+      ws.onmessage = async (e) => {
         const data = JSON.parse(e.data);
         switch (data.type) {
           case wstypes.CURRENT_USERS:
@@ -126,7 +139,7 @@ const Dashboard = () => {
           case wstypes.I_JOINED_ROOM:
             const joined = data.data.id;
             // create connection
-            const joinedNewConn = newConnection(joined);
+            const joinedNewConn = await newConnection(joined);
             joinedNewConn.ontrack = (e) => {
               const rtcInfo = rtcConnections.get(joined);
               if (rtcInfo) {
@@ -152,7 +165,7 @@ const Dashboard = () => {
             const offerFrom = data.data.id;
             const offer = data.data.offer;
             // create connection
-            const newConn = newConnection(offerFrom);
+            const newConn = await newConnection(offerFrom);
             newConn.ontrack = (e) => {
               const rtcInfo = rtcConnections.get(offerFrom);
               if (rtcInfo) {
@@ -202,6 +215,14 @@ const Dashboard = () => {
       }
     };
   }, [loading]);
+  useEffect(() => {
+    if (user) {
+      const me = userlist.filter((u) => u.id === user.id)[0];
+      if (me && me.status === "idle") {
+        stopLocalStream();
+      }
+    }
+  }, [userlist]);
   return (
     <div>
       <Messages />
