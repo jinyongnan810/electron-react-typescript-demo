@@ -6,6 +6,7 @@ import UserList from "./meeting/UserList";
 import * as wstypes from "../websocket/types";
 import * as types from "../actions/types";
 import ConnectedAudioList from "./meeting/ConnectedAudioList";
+import { showMessages } from "../actions/messages";
 interface RTCPeerInfo {
   id: string;
   rtcConn: RTCPeerConnection;
@@ -18,7 +19,7 @@ const rtcConfig = {
   iceCandidatePoolSize: 2,
   iceServers: [
     {
-      urls: "stun:stun.l.google.com",
+      urls: "stun:stun.l.google.com:19302",
     },
   ],
 };
@@ -33,7 +34,7 @@ const sendMsg = (type: string, data: Object) => {
     ws.send(JSON.stringify(msg));
   }
 };
-// WebRT
+// WebRTC
 const newConnection = async (id: string) => {
   if (!localStream) {
     await getLocalStream();
@@ -93,7 +94,7 @@ const getLocalStream = async () => {
       video: false,
     });
   } catch (error) {
-    alert(`Cannot get localstream:${JSON.stringify(error)}`);
+    console.error(`Cannot get localstream:${JSON.stringify(error)}`);
   }
 };
 const stopLocalStream = async () => {
@@ -105,7 +106,7 @@ const stopLocalStream = async () => {
       localStream = null;
     }
   } catch (error) {
-    alert(`Cannot stop localstream:${JSON.stringify(error)}`);
+    console.error(`Cannot stop localstream:${JSON.stringify(error)}`);
   }
 };
 
@@ -195,14 +196,21 @@ const Dashboard = () => {
             // deal with icecandidate
             whenIceCandidate(candidateFrom, candidate);
             break;
-
+          case wstypes.ERROR:
+            const errors = data.data;
+            dispatch(
+              showMessages(
+                "error",
+                errors.map((e: string) => ({ message: e }))
+              )
+            );
           default:
             console.log(`Unknown type:${data.type}`);
         }
       };
       ws.onclose = (e) => {
-        console.log("Websocket closed.");
-        alert("Websocket closed.");
+        console.error("Websocket closed.");
+        dispatch(showMessages("error", [{ message: "Websocket closed." }]));
       };
     }
     // clean connections when leaving the page
