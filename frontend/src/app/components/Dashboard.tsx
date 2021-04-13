@@ -159,7 +159,9 @@ const Dashboard = () => {
             let leftRoomUser = rtcConnections.get(data.data.id);
             if (leftRoomUser) {
               leftRoomUser.rtcConn.close();
+              rtcConnections.delete(data.data.id);
             }
+
             dispatch({ type: types.REMOVE_AUDIO, payload: data.data.id });
             break;
 
