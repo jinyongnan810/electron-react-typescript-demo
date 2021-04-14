@@ -15,6 +15,7 @@ interface RTCPeerInfo {
 let ws: WebSocket | null;
 let rtcConnections: Map<string, RTCPeerInfo> = new Map();
 let localStream: MediaStream | null = null;
+let localStreamLoading = false;
 const rtcConfig = {
   iceCandidatePoolSize: 2,
   iceServers: [
@@ -36,9 +37,7 @@ const sendMsg = (type: string, data: Object) => {
 };
 // WebRTC
 const newConnection = async (id: string) => {
-  if (!localStream) {
-    await getLocalStream();
-  }
+  await getLocalStream();
   const rtcConn = new RTCPeerConnection(rtcConfig);
   rtcConnections.set(id, { id, rtcConn });
   // add tracks
@@ -89,10 +88,18 @@ const whenIceCandidate = (id: string, iceCandidate: RTCIceCandidate) => {
 
 const getLocalStream = async () => {
   try {
+    if (localStreamLoading) {
+      return;
+    }
+    if (localStream) {
+      return;
+    }
+    localStreamLoading = true;
     localStream = await navigator.mediaDevices.getUserMedia({
       audio: true,
       video: false,
     });
+    localStreamLoading = false;
   } catch (error) {
     console.error(`Cannot get localstream:${JSON.stringify(error)}`);
   }
