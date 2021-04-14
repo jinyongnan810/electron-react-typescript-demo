@@ -1,5 +1,6 @@
 import WebSocket from "ws";
 import * as types from "./types";
+/* Types */
 interface UserInfo {
   id: string;
   ws: WebSocket;
@@ -11,7 +12,11 @@ interface MsgType {
   type: string;
   data: Object;
 }
+/* Types END */
+/* Vriables */
 const clients: Map<string, UserInfo> = new Map();
+/* Vriables END */
+/* Common Functions */
 const sendToClient = (ws: WebSocket, msg: MsgType) => {
   ws.send(JSON.stringify(msg));
 };
@@ -100,6 +105,8 @@ const broadcastIExitedRoom = (me: UserInfo, host: UserInfo) => {
     .filter((w) => w.id !== me.id)
     .forEach((u) => sendToClient(u.ws, msg));
 };
+/* Common Functions END */
+/* WS Server */
 const wss = new WebSocket.Server({ noServer: true });
 wss.on("connection", (ws, request: any) => {
   // accept the client
@@ -207,6 +214,8 @@ wss.on("connection", (ws, request: any) => {
     broadcastClientsStatus();
   });
 });
+/* WS Server END*/
+/* Timers */
 setInterval(() => {
   clients.forEach((user: UserInfo, key: string, map: Map<string, UserInfo>) => {
     if (!(user.ws as any).isAlive) {
@@ -216,4 +225,5 @@ setInterval(() => {
     user.ws.ping("");
   });
 }, 2000);
+/* Timers END */
 export { wss };
