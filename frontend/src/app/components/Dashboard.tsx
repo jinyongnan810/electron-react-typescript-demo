@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { Redirect, useHistory } from "react-router";
 import Messages from "./Messages";
 import UserList from "./meeting/UserList";
+import Settings from "./meeting/Settings";
 import * as wstypes from "../websocket/types";
 import * as types from "../actions/types";
 import ConnectedAudioList from "./meeting/ConnectedAudioList";
@@ -246,6 +247,7 @@ const Dashboard = () => {
       <Messages />
       <UserList me={user?.id} joinRoom={joinRoom} exitRoom={exitRoom} />
       <ConnectedAudioList />
+      <Settings />
     </div>
   );
 };
