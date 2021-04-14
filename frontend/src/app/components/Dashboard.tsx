@@ -11,6 +11,7 @@ import { showMessages } from "../actions/messages";
 interface RTCPeerInfo {
   id: string;
   rtcConn: RTCPeerConnection;
+  rtcSender?: RTCRtpSender;
   stream?: MediaStream;
 }
 let ws: WebSocket | null;
@@ -40,12 +41,13 @@ const sendMsg = (type: string, data: Object) => {
 const newConnection = async (id: string) => {
   await getLocalStream();
   const rtcConn = new RTCPeerConnection(rtcConfig);
-  rtcConnections.set(id, { id, rtcConn });
   // add tracks
   if (localStream) {
-    localStream
-      .getAudioTracks()
-      .forEach((track) => rtcConn.addTrack(track, localStream!));
+    const sender = rtcConn.addTrack(
+      localStream.getAudioTracks()[0],
+      localStream!
+    );
+    rtcConnections.set(id, { id, rtcConn, rtcSender: sender });
   } else {
     console.error("No local stream!");
   }
@@ -87,7 +89,7 @@ const whenIceCandidate = (id: string, iceCandidate: RTCIceCandidate) => {
   }
 };
 
-const getLocalStream = async () => {
+const getLocalStream = async (audioDevice: string | null = null) => {
   try {
     if (localStreamLoading) {
       return;
@@ -97,7 +99,7 @@ const getLocalStream = async () => {
     }
     localStreamLoading = true;
     localStream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
+      audio: audioDevice ? { deviceId: { exact: audioDevice } } : true,
       video: false,
     });
     localStreamLoading = false;
@@ -115,6 +117,30 @@ const stopLocalStream = async () => {
     }
   } catch (error) {
     console.error(`Cannot stop localstream:${JSON.stringify(error)}`);
+  }
+};
+const changeLocalStream = async (audioDeviceId: string) => {
+  if (localStream) {
+    // remove tracks from rtcConnections
+    rtcConnections.forEach((c) => {
+      c.rtcConn.removeTrack(c.rtcSender!);
+    });
+    // stop tracks
+    await stopLocalStream();
+    // get local stream
+    await getLocalStream(audioDeviceId);
+    // add tracks to all rtcConnections
+    if (localStream) {
+      rtcConnections.forEach((c) => {
+        const sender = c.rtcConn.addTrack(
+          localStream!.getAudioTracks()[0],
+          localStream!
+        );
+        c.rtcSender = sender;
+      });
+    } else {
+      console.error("Local stream not found.");
+    }
   }
 };
 
@@ -247,7 +273,7 @@ const Dashboard = () => {
       <Messages />
       <UserList me={user?.id} joinRoom={joinRoom} exitRoom={exitRoom} />
       <ConnectedAudioList />
-      <Settings />
+      <Settings changeLocalStream={changeLocalStream} />
     </div>
   );
 };

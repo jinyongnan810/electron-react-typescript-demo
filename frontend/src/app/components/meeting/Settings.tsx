@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 
-const Settings = () => {
+const Settings = ({ changeLocalStream }: { changeLocalStream: Function }) => {
   const [speakers, setSpeakers] = useState<MediaDeviceInfo[]>([]);
   const [microphones, setMicrophones] = useState<MediaDeviceInfo[]>([]);
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
   const getDevices = async () => {
     const devices = await navigator.mediaDevices.enumerateDevices();
-    console.log(devices);
     devices.forEach((d) => {
       switch (d.kind) {
         case "audioinput":
@@ -26,6 +25,11 @@ const Settings = () => {
   useEffect(() => {
     getDevices();
   }, []);
+  const onMicChanges = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (e.target.value) {
+      changeLocalStream(e.target.value);
+    }
+  };
   return (
     <div
       className="modal fade"
@@ -65,6 +69,7 @@ const Settings = () => {
               className="form-select"
               aria-label="Microphones"
               id="microphones"
+              onChange={onMicChanges}
             >
               {microphones.length > 0 ? (
                 microphones.map((s, i) => (

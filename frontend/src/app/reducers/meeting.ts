@@ -39,9 +39,12 @@ const meetingReducer: Reducer<MeetingInfo, MeetingBaseAction> = (
         users: payload as MeetingInfo["users"],
       };
     case types.ADD_AUDIO:
+      const restAudios = state.audios.filter(
+        (a) => (payload as ConnectedAudioType).id !== a.id
+      );
       return {
         ...state,
-        audios: [...state.audios, payload as ConnectedAudioType],
+        audios: [...restAudios, payload as ConnectedAudioType],
       };
     case types.REMOVE_AUDIO:
       const newAudios = state.audios.filter((a) => a.id !== payload);
