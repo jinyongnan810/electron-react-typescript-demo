@@ -1,4 +1,4 @@
-import { useAppDispatch } from "../../../app/hooks";
+import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import React, { useEffect, useState } from "react";
 import * as types from "../../actions/types";
 
@@ -7,6 +7,12 @@ const Settings = ({ changeLocalStream }: { changeLocalStream: Function }) => {
   const [microphones, setMicrophones] = useState<MediaDeviceInfo[]>([]);
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
   const dispatch = useAppDispatch();
+  const audioOutputDevice = useAppSelector(
+    (state) => state.meeting.audioOutputDevice
+  );
+  const audioInputDevice = useAppSelector(
+    (state) => state.meeting.audioInputDevice
+  );
   const getDevices = async () => {
     const devices = await navigator.mediaDevices.enumerateDevices();
     setMicrophones(devices.filter((d) => d.kind === "audioinput"));
@@ -15,11 +21,15 @@ const Settings = ({ changeLocalStream }: { changeLocalStream: Function }) => {
   };
   useEffect(() => {
     getDevices();
-    navigator.mediaDevices.ondevicechange = (e) => getDevices();
+    navigator.mediaDevices.addEventListener("devicechange", getDevices);
+    return () => {
+      navigator.mediaDevices.removeEventListener("devicechange", getDevices);
+    };
   }, []);
   const onMicChanges = (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (e.target.value) {
       changeLocalStream(e.target.value);
+      dispatch({ type: types.AUDIO_INPUT_DEVICE, payload: e.target.value });
     }
   };
   const onSpeakerChanges = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -54,6 +64,7 @@ const Settings = ({ changeLocalStream }: { changeLocalStream: Function }) => {
               className="form-select"
               aria-label="Speakers"
               id="speakers"
+              defaultValue={audioOutputDevice ?? undefined}
               onChange={onSpeakerChanges}
             >
               {speakers.length > 0 ? (
@@ -71,6 +82,7 @@ const Settings = ({ changeLocalStream }: { changeLocalStream: Function }) => {
               className="form-select"
               aria-label="Microphones"
               id="microphones"
+              defaultValue={audioInputDevice ?? undefined}
               onChange={onMicChanges}
             >
               {microphones.length > 0 ? (

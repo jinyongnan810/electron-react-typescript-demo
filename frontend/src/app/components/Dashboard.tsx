@@ -11,7 +11,6 @@ import { showMessages } from "../actions/messages";
 interface RTCPeerInfo {
   id: string;
   rtcConn: RTCPeerConnection;
-  rtcSender?: RTCRtpSender;
   stream?: MediaStream;
 }
 let ws: WebSocket | null;
@@ -43,11 +42,8 @@ const newConnection = async (id: string) => {
   const rtcConn = new RTCPeerConnection(rtcConfig);
   // add tracks
   if (localStream) {
-    const sender = rtcConn.addTrack(
-      localStream.getAudioTracks()[0],
-      localStream!
-    );
-    rtcConnections.set(id, { id, rtcConn, rtcSender: sender });
+    rtcConn.addTrack(localStream.getAudioTracks()[0], localStream!);
+    rtcConnections.set(id, { id, rtcConn });
   } else {
     console.error("No local stream!");
   }
@@ -120,33 +116,7 @@ const stopLocalStream = async () => {
     console.error(`Cannot stop localstream:${JSON.stringify(error)}`);
   }
 };
-const changeLocalStream = async (audioDeviceId: string) => {
-  console.log("changeLocalStream");
-  if (localStream) {
-    // remove tracks from rtcConnections
-    rtcConnections.forEach((c) => {
-      c.rtcConn.removeTrack(c.rtcSender!);
-      console.log("remove track");
-    });
-    // stop tracks
-    await stopLocalStream();
-    // get local stream
-    await getLocalStream(audioDeviceId);
-    // add tracks to all rtcConnections
-    if (localStream) {
-      rtcConnections.forEach((c) => {
-        const sender = c.rtcConn.addTrack(
-          localStream!.getAudioTracks()[0],
-          localStream!
-        );
-        c.rtcSender = sender;
-        console.log("add track");
-      });
-    } else {
-      console.error("Local stream not found.");
-    }
-  }
-};
+
 const getPermissions = async () => {
   (await navigator.mediaDevices.getUserMedia({ video: true, audio: true }))
     .getTracks()
@@ -168,6 +138,43 @@ const Dashboard = () => {
     rtcConnections = new Map();
     dispatch({ type: types.CLEAR_AUDIO });
     sendMsg(wstypes.EXIT_ROOM, {});
+  };
+  const establishNewConnection = async (id: string) => {
+    const conn = await newConnection(id);
+
+    conn.ontrack = (e) => {
+      const rtcInfo = rtcConnections.get(id);
+      if (rtcInfo) {
+        rtcInfo.stream = e.streams[0];
+        dispatch({
+          type: types.REMOVE_AUDIO,
+          payload: id,
+        });
+        dispatch({
+          type: types.ADD_AUDIO,
+          payload: { id: id, stream: rtcInfo.stream },
+        });
+      }
+    };
+    return conn;
+  };
+  const changeLocalStream = async (audioDeviceId: string) => {
+    console.log("changeLocalStream");
+    rtcConnections.forEach((con) => {
+      con.rtcConn.close();
+    });
+    if (localStream) {
+      localStream.getTracks().forEach((t) => t.stop);
+    }
+    localStream = null;
+    await getLocalStream(audioDeviceId);
+    const peers: string[] = [];
+    rtcConnections.forEach((c) => peers.push(c.id));
+    rtcConnections.clear();
+    peers.forEach(async (p) => {
+      const conn = await establishNewConnection(p);
+      createOffer(p, conn);
+    });
   };
   useEffect(() => {
     if (isAuthenticated) {
@@ -199,17 +206,8 @@ const Dashboard = () => {
           case wstypes.I_JOINED_ROOM:
             const joined = data.data.id;
             // create connection
-            const joinedNewConn = await newConnection(joined);
-            joinedNewConn.ontrack = (e) => {
-              const rtcInfo = rtcConnections.get(joined);
-              if (rtcInfo) {
-                rtcInfo.stream = e.streams[0];
-                dispatch({
-                  type: types.ADD_AUDIO,
-                  payload: { id: joined, stream: rtcInfo.stream },
-                });
-              }
-            };
+            const joinedNewConn = await establishNewConnection(joined);
+
             // create offer
             createOffer(joined, joinedNewConn);
             break;
@@ -227,17 +225,7 @@ const Dashboard = () => {
             const offerFrom = data.data.id;
             const offer = data.data.offer;
             // create connection
-            const newConn = await newConnection(offerFrom);
-            newConn.ontrack = (e) => {
-              const rtcInfo = rtcConnections.get(offerFrom);
-              if (rtcInfo) {
-                rtcInfo.stream = e.streams[0];
-                dispatch({
-                  type: types.ADD_AUDIO,
-                  payload: { id: offerFrom, stream: rtcInfo.stream },
-                });
-              }
-            };
+            const newConn = await establishNewConnection(offerFrom);
             // deal with offer and create answer
             whenOfferred(offerFrom, offer);
 
