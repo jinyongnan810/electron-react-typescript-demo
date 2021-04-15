@@ -147,6 +147,11 @@ const changeLocalStream = async (audioDeviceId: string) => {
     }
   }
 };
+const getPermissions = async () => {
+  (await navigator.mediaDevices.getUserMedia({ video: true, audio: true }))
+    .getTracks()
+    .forEach((track) => track.stop());
+};
 
 const Dashboard = () => {
   const { isAuthenticated, loading, user } = useAppSelector(
@@ -166,6 +171,21 @@ const Dashboard = () => {
   };
   useEffect(() => {
     if (isAuthenticated) {
+      // get device permissions
+      getPermissions().then(() => {
+        // check permissions
+        navigator.permissions.query({ name: "microphone" }).then((res) => {
+          if (res.state !== "granted") {
+            dispatch(
+              showMessages("error", [
+                { message: "Microphone access is not permitted!" },
+              ])
+            );
+          }
+        });
+      });
+
+      // create websocket
       ws = new WebSocket(process.env.WEBSOCKET_URL!);
       ws.onopen = (e) => {
         console.log("Connected to server.");

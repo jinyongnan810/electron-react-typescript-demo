@@ -15,6 +15,7 @@ const Settings = ({ changeLocalStream }: { changeLocalStream: Function }) => {
   };
   useEffect(() => {
     getDevices();
+    navigator.mediaDevices.ondevicechange = (e) => getDevices();
   }, []);
   const onMicChanges = (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (e.target.value) {
