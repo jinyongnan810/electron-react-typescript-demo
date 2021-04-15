@@ -164,7 +164,7 @@ const Dashboard = () => {
       con.rtcConn.close();
     });
     if (localStream) {
-      localStream.getTracks().forEach((t) => t.stop);
+      localStream.getTracks().forEach((t) => t.stop());
     }
     localStream = null;
     await getLocalStream(audioDeviceId);
