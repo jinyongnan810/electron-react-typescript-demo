@@ -14,3 +14,4 @@ export const UPDATE_USERS = "UPDATE_USERS";
 export const ADD_AUDIO = "ADD_AUDIO";
 export const REMOVE_AUDIO = "REMOVE_AUDIO";
 export const CLEAR_AUDIO = "CLEAR_AUDIO";
+export const AUDIO_OUTPUT_DEVICE = "AUDIO_OUTPUT_DEVICE";

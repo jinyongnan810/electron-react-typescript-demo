@@ -1,26 +1,17 @@
+import { useAppDispatch } from "../../../app/hooks";
 import React, { useEffect, useState } from "react";
+import * as types from "../../actions/types";
 
 const Settings = ({ changeLocalStream }: { changeLocalStream: Function }) => {
   const [speakers, setSpeakers] = useState<MediaDeviceInfo[]>([]);
   const [microphones, setMicrophones] = useState<MediaDeviceInfo[]>([]);
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
+  const dispatch = useAppDispatch();
   const getDevices = async () => {
     const devices = await navigator.mediaDevices.enumerateDevices();
-    devices.forEach((d) => {
-      switch (d.kind) {
-        case "audioinput":
-          setMicrophones([...microphones, d]);
-          break;
-        case "audiooutput":
-          setSpeakers([...speakers, d]);
-          break;
-        case "videoinput":
-          setCameras([...cameras, d]);
-          break;
-        default:
-          break;
-      }
-    });
+    setMicrophones(devices.filter((d) => d.kind === "audioinput"));
+    setSpeakers(devices.filter((d) => d.kind === "audiooutput"));
+    setCameras(devices.filter((d) => d.kind === "videoinput"));
   };
   useEffect(() => {
     getDevices();
@@ -28,6 +19,11 @@ const Settings = ({ changeLocalStream }: { changeLocalStream: Function }) => {
   const onMicChanges = (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (e.target.value) {
       changeLocalStream(e.target.value);
+    }
+  };
+  const onSpeakerChanges = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (e.target.value) {
+      dispatch({ type: types.AUDIO_OUTPUT_DEVICE, payload: e.target.value });
     }
   };
   return (
@@ -53,10 +49,15 @@ const Settings = ({ changeLocalStream }: { changeLocalStream: Function }) => {
           </div>
           <div className="modal-body">
             <label htmlFor="speakers">Select Speaker</label>
-            <select className="form-select" aria-label="Speakers" id="speakers">
+            <select
+              className="form-select"
+              aria-label="Speakers"
+              id="speakers"
+              onChange={onSpeakerChanges}
+            >
               {speakers.length > 0 ? (
                 speakers.map((s, i) => (
-                  <option key={s.deviceId} value={s.deviceId}>
+                  <option key={s.groupId + s.deviceId} value={s.deviceId}>
                     {s.label ?? `Speaker ${i + 1}`}
                   </option>
                 ))
@@ -73,7 +74,7 @@ const Settings = ({ changeLocalStream }: { changeLocalStream: Function }) => {
             >
               {microphones.length > 0 ? (
                 microphones.map((s, i) => (
-                  <option key={s.deviceId} value={s.deviceId}>
+                  <option key={s.groupId + s.deviceId} value={s.deviceId}>
                     {s.label ?? `Microphone ${i + 1}`}
                   </option>
                 ))
@@ -85,7 +86,7 @@ const Settings = ({ changeLocalStream }: { changeLocalStream: Function }) => {
             <select className="form-select" aria-label="Cameras" id="cameras">
               {cameras.length > 0 ? (
                 cameras.map((s, i) => (
-                  <option key={s.deviceId} value={s.deviceId}>
+                  <option key={s.groupId + s.deviceId} value={s.deviceId}>
                     {s.label ?? `Camera ${i + 1}`}
                   </option>
                 ))

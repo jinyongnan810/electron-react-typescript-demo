@@ -102,6 +102,7 @@ const getLocalStream = async (audioDevice: string | null = null) => {
       audio: audioDevice ? { deviceId: { exact: audioDevice } } : true,
       video: false,
     });
+    console.log(localStream);
     localStreamLoading = false;
   } catch (error) {
     console.error(`Cannot get localstream:${JSON.stringify(error)}`);
@@ -120,10 +121,12 @@ const stopLocalStream = async () => {
   }
 };
 const changeLocalStream = async (audioDeviceId: string) => {
+  console.log("changeLocalStream");
   if (localStream) {
     // remove tracks from rtcConnections
     rtcConnections.forEach((c) => {
       c.rtcConn.removeTrack(c.rtcSender!);
+      console.log("remove track");
     });
     // stop tracks
     await stopLocalStream();
@@ -137,6 +140,7 @@ const changeLocalStream = async (audioDeviceId: string) => {
           localStream!
         );
         c.rtcSender = sender;
+        console.log("add track");
       });
     } else {
       console.error("Local stream not found.");
