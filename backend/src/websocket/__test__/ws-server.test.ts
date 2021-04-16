@@ -1,12 +1,20 @@
+import request from "superwstest";
 import WebSocket from "ws";
-xit("connect server without authentication", async (done) => {
-  const ws = new WebSocket("ws://localhost:5000");
-  ws.onopen = () => {
-    console.log("Connected");
+import { server, checkAliveTimer } from "../..";
+
+describe("Websocket Server test", () => {
+  beforeAll((done) => {
+    server.close();
+    clearInterval(checkAliveTimer);
     done();
-  };
-  ws.onerror = (error) => {
-    console.log(`Connect Error:${error.message}`);
-    fail();
-  };
+  });
+  beforeEach((done) => {
+    server.listen(0, "localhost", done);
+  });
+  afterEach((done) => {
+    server.close(done);
+  });
+  it("connect server without authentication", async () => {
+    await request(server).ws("").expectConnectionError(401);
+  });
 });

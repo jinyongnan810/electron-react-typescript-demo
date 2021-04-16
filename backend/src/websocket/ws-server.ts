@@ -108,6 +108,7 @@ const broadcastIExitedRoom = (me: UserInfo, host: UserInfo) => {
 /* Common Functions END */
 /* WS Server */
 const wss = new WebSocket.Server({ noServer: true });
+
 wss.on("connection", (ws, request: any) => {
   // accept the client
   (ws as any).isAlive = true;
@@ -216,7 +217,7 @@ wss.on("connection", (ws, request: any) => {
 });
 /* WS Server END*/
 /* Timers */
-setInterval(() => {
+const checkAliveTimer: NodeJS.Timeout = setInterval(() => {
   clients.forEach((user: UserInfo, key: string, map: Map<string, UserInfo>) => {
     if (!(user.ws as any).isAlive) {
       return user.ws.terminate();
@@ -226,4 +227,4 @@ setInterval(() => {
   });
 }, 2000);
 /* Timers END */
-export { wss };
+export { wss, checkAliveTimer };

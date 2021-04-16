@@ -11,16 +11,16 @@ dotenv.config();
 import { app } from "./app";
 import { extractUser } from "./middlewares/current-user";
 
-import { wss } from "./websocket/ws-server";
+import { wss, checkAliveTimer } from "./websocket/ws-server";
 
-const start = async () => {
-  console.log("Backend starting...");
-  if (!process.env.JWT_KEY) {
-    throw new Error("JWT_KEY not set.");
-  }
-  try {
-    const uri = await mongod.getUri();
-    await mongoose.connect(
+console.log("Backend starting...");
+if (!process.env.JWT_KEY) {
+  throw new Error("JWT_KEY not set.");
+}
+
+mongod.getUri().then((uri) => {
+  mongoose
+    .connect(
       // `mongodb+srv://jinyongnan:${process.env.MONGO_PWD}@cluster0.xk5om.gcp.mongodb.net/electron-full-demo?retryWrites=true&w=majority`,
       uri,
       {
@@ -28,33 +28,34 @@ const start = async () => {
         useUnifiedTopology: true,
         useCreateIndex: true,
       }
-    );
-    console.log("DB connected.");
-  } catch (error) {
-    console.log(error);
-  }
-  const server = createServer(app);
+    )
+    .then(() => {
+      console.log("DB connected.");
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+});
+const server = createServer(app);
 
-  server.on("upgrade", (request, socket, head) => {
-    cookieSesion({
-      signed: false, // no encryption
-      secure: process.env.NODE_ENV === "production", // only https
-    })(request, socket, () => {
-      extractUser(request);
-      if (!request.currentUser) {
-        socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
-        socket.destroy();
-        return;
-      }
-      wss.handleUpgrade(request, socket, head, function (ws) {
-        wss.emit("connection", ws, request);
-      });
+server.on("upgrade", (request, socket, head) => {
+  cookieSesion({
+    signed: false, // no encryption
+    secure: process.env.NODE_ENV === "production", // only https
+  })(request, socket, () => {
+    extractUser(request);
+    if (!request.currentUser) {
+      socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
+      socket.destroy();
+      return;
+    }
+    wss.handleUpgrade(request, socket, head, function (ws) {
+      wss.emit("connection", ws, request);
     });
   });
+});
 
-  server.listen(5000, async () => {
-    console.log("Backend listening on port 5000.");
-  });
-};
-
-start();
+server.listen(5000, async () => {
+  console.log("Backend listening on port 5000.");
+});
+export { server, checkAliveTimer };

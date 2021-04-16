@@ -16,13 +16,14 @@ let mongo: any;
 beforeAll(async () => {
   // set env
   process.env.JWT_KEY = "secret";
-
-  mongo = new MongoMemoryServer();
-  const mongoUri = await mongo.getUri();
-  await mongoose.connect(mongoUri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  try {
+    mongo = new MongoMemoryServer();
+    const mongoUri = await mongo.getUri();
+    await mongoose.connect(mongoUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+  } catch (error) {}
 });
 
 beforeEach(async () => {
