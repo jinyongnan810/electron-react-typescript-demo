@@ -6,17 +6,17 @@ import { app } from "../app";
 declare global {
   namespace NodeJS {
     interface Global {
-      signup(): Promise<string[]>;
+      signup(email?: string, pwd?: string): Promise<string[]>;
     }
   }
 }
 
-global.signup = async () => {
+global.signup = async (email?: string, pwd?: string) => {
   const signInRes = await request(app)
     .post("/api/users/signup")
     .send({
-      email: "test@test.com",
-      password: "test",
+      email: email ?? "test@test.com",
+      password: pwd ?? "test",
     })
     .expect(201);
   const cookie = signInRes.get("Set-Cookie");
