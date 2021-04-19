@@ -220,6 +220,7 @@ wss.on("connection", (ws, request: any) => {
 const checkAliveTimer: NodeJS.Timeout = setInterval(() => {
   clients.forEach((user: UserInfo, key: string, map: Map<string, UserInfo>) => {
     if (!(user.ws as any).isAlive) {
+      console.log("timeout");
       return user.ws.terminate();
     }
     (user.ws as any).isAlive = false;
