@@ -228,4 +228,4 @@ const checkAliveTimer: NodeJS.Timeout = setInterval(() => {
   });
 }, 2000);
 /* Timers END */
-export { wss, checkAliveTimer };
+export { wss };

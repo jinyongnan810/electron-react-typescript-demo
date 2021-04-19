@@ -1,5 +1,5 @@
 import request from "superwstest";
-import { server, checkAliveTimer } from "../..";
+import { server } from "../..";
 import { User } from "../../models/user";
 import * as types from "../types";
 import mongoose from "mongoose";
@@ -7,7 +7,6 @@ import mongoose from "mongoose";
 describe("Websocket Server test", () => {
   beforeAll((done) => {
     server.close();
-    // clearInterval(checkAliveTimer);
     done();
   });
   beforeEach(async (done) => {

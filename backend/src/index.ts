@@ -11,7 +11,7 @@ dotenv.config();
 import { app } from "./app";
 import { extractUser } from "./middlewares/current-user";
 
-import { wss, checkAliveTimer } from "./websocket/ws-server";
+import { wss } from "./websocket/ws-server";
 
 console.log("Backend starting...");
 if (!process.env.JWT_KEY) {
@@ -33,7 +33,7 @@ mongod.getUri().then((uri) => {
       console.log("DB connected.");
     })
     .catch((error) => {
-      console.log(error);
+      console.error(error.message);
     });
 });
 const server = createServer(app);
@@ -58,4 +58,4 @@ server.on("upgrade", (request, socket, head) => {
 server.listen(5000, async () => {
   console.log("Backend listening on port 5000.");
 });
-export { server, checkAliveTimer };
+export { server };
