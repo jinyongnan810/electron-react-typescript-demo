@@ -74,6 +74,7 @@ const whenOfferred = async (id: string, offer: RTCSessionDescription) => {
       standByIceCandidates[id].forEach((candidate) => {
         conn.rtcConn.addIceCandidate(candidate);
       });
+      standByIceCandidates[id] = [];
     }
     sendMsg(wstypes.TRANSFER_ANSWER, { to: id, answer });
   }
