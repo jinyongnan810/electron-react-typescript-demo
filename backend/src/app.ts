@@ -15,7 +15,7 @@ import { handleError } from "./middlewares/error-handler";
 
 const app = express();
 var corsOptions = {
-  origin: "http://localhost:4000",
+  origin: ["http://localhost:4000", "https://localhost:4000"],
   credentials: true,
   optionsSuccessStatus: 200,
 };
@@ -24,7 +24,8 @@ app.set("trust proxy", true); //trust ingress nginx
 app.use(
   cookieSesion({
     signed: false, // no encryption
-    secure: process.env.NODE_ENV === "production", // only https
+    secure: true, //process.env.NODE_ENV === "production", // only https
+    sameSite: "none",
   })
 );
 app.use(json());
