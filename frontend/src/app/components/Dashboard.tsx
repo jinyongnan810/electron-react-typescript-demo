@@ -17,7 +17,7 @@ let ws: WebSocket | null;
 let rtcConnections: Map<string, RTCPeerInfo> = new Map();
 let localStream: MediaStream | null = null;
 let localStreamLoading = false;
-let standByIceCandidates:{[id:string]:RTCIceCandidate[]} = {};
+let standByIceCandidates: { [id: string]: RTCIceCandidate[] } = {};
 const rtcConfig = {
   // iceCandidatePoolSize: 2,
   iceServers: [
@@ -70,11 +70,10 @@ const whenOfferred = async (id: string, offer: RTCSessionDescription) => {
     await conn.rtcConn.setRemoteDescription(offer);
     const answer = await conn.rtcConn.createAnswer();
     await conn.rtcConn.setLocalDescription(answer);
-    console.log("setRemoteDescription setLocalDescription")
-    if(standByIceCandidates[id]){
-      standByIceCandidates[id].forEach(candidate=>{
-        conn.rtcConn.addIceCandidate(candidate)
-      })
+    if (standByIceCandidates[id]) {
+      standByIceCandidates[id].forEach((candidate) => {
+        conn.rtcConn.addIceCandidate(candidate);
+      });
     }
     sendMsg(wstypes.TRANSFER_ANSWER, { to: id, answer });
   }
@@ -82,22 +81,19 @@ const whenOfferred = async (id: string, offer: RTCSessionDescription) => {
 const whenAnswered = (id: string, answer: RTCSessionDescription) => {
   const conn = rtcConnections.get(id);
   if (conn) {
-    console.log("setRemoteDescription")
     conn.rtcConn.setRemoteDescription(answer);
   }
 };
 const whenIceCandidate = (id: string, iceCandidate: RTCIceCandidate) => {
   const conn = rtcConnections.get(id);
-  console.log("addIceCandidate0")
   if (conn) {
-    console.log("addIceCandidate")
     conn.rtcConn.addIceCandidate(iceCandidate);
-  }else{
+  } else {
     // ice candidate before setLocalDescription
-    if(!standByIceCandidates[id]){
-      standByIceCandidates[id]=[]
+    if (!standByIceCandidates[id]) {
+      standByIceCandidates[id] = [];
     }
-    standByIceCandidates[id].push(iceCandidate)
+    standByIceCandidates[id].push(iceCandidate);
   }
 };
 
