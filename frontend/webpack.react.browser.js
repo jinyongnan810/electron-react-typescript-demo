@@ -44,7 +44,7 @@ module.exports = () => {
       host: "0.0.0.0",
       port: 4000,
       publicPath: "/",
-      https: true,
+      // https: true,// use this when need https
     },
     output: {
       path: path.resolve(rootPath, "dist/renderer"),
