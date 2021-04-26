@@ -48,7 +48,7 @@ module.exports = () => {
     },
     output: {
       path: path.resolve(rootPath, "dist/renderer"),
-      filename: "js/[name].js",
+      filename: "js/[name].[contenthash].js",
       publicPath: "./",
     },
     plugins: [

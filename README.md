@@ -13,3 +13,9 @@ cd frontend & npm run dev:browser # start web server at http://localhost:4000
 - websocket
 - webrtc
 - jest
+
+### Electron package
+
+```bash
+npm run package
+```
